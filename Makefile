@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -g -Wall -Wextra -pthread
 
 PROGRAMS = 1cozinheiro \
-Ncozinheiros
+Ncozinheiros \ NcozinheirosNpanela 
 
 all: $(PROGRAMS)
 
