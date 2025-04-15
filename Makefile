@@ -1,7 +1,8 @@
 CC = gcc
 CFLAGS = -g -Wall -Wextra -pthread
 
-PROGRAMS = 1cozinheiro 
+PROGRAMS = 1cozinheiro \
+Ncozinheiros
 
 all: $(PROGRAMS)
 
