@@ -17,68 +17,105 @@ int main()
     // Inicializa o gerador de números aleatórios
     std::srand(std::time(nullptr));
 
+    // Carrega a fonte para os labels
+    sf::Font font;
+    if (!font.loadFromFile("../assets/fonts/Minecraft.ttf"))
+        return -1;
+
+
     // Lista os arquivos na pasta assets/customers
     std::vector<std::string> customerFiles;
-    for (const auto& entry : fs::directory_iterator("../assets/customers")) {
-        if (entry.is_regular_file()) {
+    for (const auto& entry : fs::directory_iterator("../assets/customers"))
+        if (entry.is_regular_file())
             customerFiles.push_back(entry.path().string());
-        }
-    }
 
-    // Verifica se há arquivos disponíveis
-    if (customerFiles.empty()) {
-        return -1; // Retorna erro se não houver arquivos na pasta
-    }
 
-    // Vetor para armazenar as texturas e sprites dos clientes
     std::vector<sf::Texture> customerTextures(MAX_PEOPLE);
     std::vector<sf::Sprite> customerSprites(MAX_PEOPLE);
+    std::vector<sf::Text> customerLabels(MAX_PEOPLE); // Labels para os clientes
+    std::vector<sf::Sprite> potSprites(MAX_CHEFS);
+    std::vector<sf::Text> potLabels(MAX_CHEFS); // Labels para as panelas
+    std::vector<sf::Sprite> chefSprites(MAX_CHEFS);
+    std::vector<sf::Text> chefLabels(MAX_CHEFS); // Labels para os chefs
 
     // Carrega as texturas aleatoriamente da lista de arquivos de clientes
     for (int i = 0; i < MAX_PEOPLE; ++i) {
-        int randomIndex = std::rand() % customerFiles.size(); // Seleciona um arquivo aleatório
-        if (!customerTextures[i].loadFromFile(customerFiles[randomIndex])) {
-            return -1; // Retorna erro se a textura não for carregada
-        }
+        int randomIndex = std::rand() % customerFiles.size();
+        if (!customerTextures[i].loadFromFile(customerFiles[randomIndex]))
+            return -1;
 
-        // Cria o sprite correspondente
         customerSprites[i].setTexture(customerTextures[i]);
 
-        // Define uma posição aleatória para o sprite
         float x = static_cast<float>(std::rand() % window.getSize().x);
         float y = static_cast<float>(std::rand() % window.getSize().y);
         customerSprites[i].setPosition(x, y);
 
-        // Aumenta o tamanho do sprite (2x maior)
         customerSprites[i].setScale(2.0f, 2.0f);
+
+        // Configura o label do cliente
+        customerLabels[i].setFont(font);
+        customerLabels[i].setString("Cliente " + std::to_string(i + 1));
+        customerLabels[i].setCharacterSize(20);
+        customerLabels[i].setFillColor(sf::Color::Black);
+        customerLabels[i].setPosition(x, y - 30); // Posição acima do sprite
     }
 
     // Carrega a textura da panela
     sf::Texture potTexture;
-    if (!potTexture.loadFromFile("../assets/panela.png")) {
-        return -1; // Retorna erro se a textura não for carregada
-    }
+    if (!potTexture.loadFromFile("../assets/panela.png"))
+        return -1;
 
-    // Vetor para armazenar os sprites das panelas
-    std::vector<sf::Sprite> potSprites(MAX_CHEFS);
+    // Carrega a textura do chef
+    sf::Texture chefTexture;
+    if (!chefTexture.loadFromFile("../assets/chef/chef_off.png"))
+        return -1;
 
-    // Cria MAX_CHEFS sprites de panelas
+    // Cria MAX_CHEFS sprites de panelas e chefs
     for (int i = 0; i < MAX_CHEFS; ++i) {
+        // Configura o sprite da panela
         potSprites[i].setTexture(potTexture);
 
-        // Define uma posição aleatória para o sprite
-        float x = static_cast<float>(std::rand() % window.getSize().x);
-        float y = static_cast<float>(std::rand() % window.getSize().y);
-        potSprites[i].setPosition(x, y);
+        // Define a posição para enfileirar verticalmente na direita
+        float potX = static_cast<float>(window.getSize().x - 200); // Posição horizontal fixa (200px da borda direita)
+        float potY = static_cast<float>(50 + i * 150); // Espaçamento vertical de 150px entre as panelas
+        potSprites[i].setPosition(potX, potY);
 
-        // Aumenta o tamanho do sprite (1.5x maior)
         potSprites[i].setScale(1.5f, 1.5f);
+
+        // Configura o label da panela
+        potLabels[i].setFont(font);
+        potLabels[i].setString("Panela " + std::to_string(i + 1));
+        potLabels[i].setCharacterSize(20);
+        potLabels[i].setFillColor(sf::Color::Black);
+        potLabels[i].setPosition(potX, potY - 30); // Posição acima do sprite
+
+        // Configura o sprite do chef
+        chefSprites[i].setTexture(chefTexture);
+
+        // Define a posição do chef ao lado da panela
+        float chefX = potX + 120.0f; // Chef posicionado 120px à direita da panela
+        float chefY = potY;          // Alinha verticalmente com a panela
+        chefSprites[i].setPosition(chefX, chefY);
+
+        chefSprites[i].setScale(1.5f, 1.5f);
+
+        // Configura o label do chef
+        chefLabels[i].setFont(font);
+        chefLabels[i].setString("Chef " + std::to_string(i + 1));
+        chefLabels[i].setCharacterSize(20);
+        chefLabels[i].setFillColor(sf::Color::Black);
+        chefLabels[i].setPosition(chefX, chefY - 30); // Posição acima do sprite
     }
 
-    // Cria um botão no canto superior direito
-    sf::RectangleShape closeButton(sf::Vector2f(50.0f, 50.0f)); // Botão de 50x50 pixels
-    closeButton.setFillColor(sf::Color::Red);
-    closeButton.setPosition(window.getSize().x - 60.0f, 10.0f); // Posição no canto superior direito
+    // Carrega a textura do botão de fechar
+    sf::Texture closeButtonTexture;
+    if (!closeButtonTexture.loadFromFile("../assets/buttons/x.png"))
+        return -1;
+
+    // Cria o sprite do botão de fechar
+    sf::Sprite closeButton(closeButtonTexture);
+    closeButton.setPosition(10.0f, 10.0f); // Posição no canto superior esquerdo
+    closeButton.setScale(3.0f, 3.0f);
 
     while (window.isOpen()) 
     {
@@ -100,14 +137,22 @@ int main()
 
         window.clear(sf::Color(246, 241, 230)); // Fundo bege
 
-        // Desenha os sprites dos clientes
-        for (const auto& sprite : customerSprites) {
-            window.draw(sprite);
+        // Desenha os sprites e labels dos clientes
+        for (int i = 0; i < MAX_PEOPLE; ++i) {
+            window.draw(customerSprites[i]);
+            window.draw(customerLabels[i]);
         }
 
-        // Desenha os sprites das panelas
-        for (const auto& sprite : potSprites) {
-            window.draw(sprite);
+        // Desenha os sprites e labels das panelas
+        for (int i = 0; i < MAX_CHEFS; ++i) {
+            window.draw(potSprites[i]);
+            window.draw(potLabels[i]);
+        }
+
+        // Desenha os sprites e labels dos chefs
+        for (int i = 0; i < MAX_CHEFS; ++i) {
+            window.draw(chefSprites[i]);
+            window.draw(chefLabels[i]);
         }
 
         // Desenha o botão de fechar
