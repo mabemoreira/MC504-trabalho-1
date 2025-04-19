@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <semaphore.h>
 
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <string.h>
+
 #define N_PORCOES 3
 #define N_ALUNOS 7
 #define PORCOES_POR_ALUNO 10
@@ -14,7 +18,33 @@ volatile int acabaram = 0;
 
 sem_t mutex[N_COZINHEIROS];  // q tb é o número de panelas, já que cada cozinheiro enche a sua       
 sem_t panela_vazia;                
-sem_t panela_cheia;               
+sem_t panela_cheia;      
+
+void sendMessageToServer(const char* message) {
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        perror("Erro ao criar socket");
+        return;
+    }
+
+    struct sockaddr_in server;
+    server.sin_family = AF_INET;
+    server.sin_port = htons(53000);
+    if (inet_pton(AF_INET, "127.0.0.1", &server.sin_addr) <= 0) {
+        perror("Erro ao configurar endereço do servidor");
+        close(sock);
+        return;
+    }
+
+    if (connect(sock, (struct sockaddr*)&server, sizeof(server)) < 0) {
+        perror("Erro ao conectar ao servidor");
+        close(sock);
+        return;
+    }
+
+    send(sock, message, strlen(message), 0);
+    close(sock);
+}
 
 void putServingsInPot(int id) {
     sleep(1); 
@@ -71,6 +101,9 @@ void* f_aluno(void *v) {
 }
 
 int main() {
+
+    sendMessageToServer("Hello from the client!");
+
     if (N_PORCOES <= 0){
         fprintf(stderr, "Como assim você não vai repor a comida em dia de feijoada? N_PORCOES deve ser maior que 0!\n");
         exit(EXIT_FAILURE);

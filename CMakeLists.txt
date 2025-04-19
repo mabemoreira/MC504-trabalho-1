@@ -19,14 +19,14 @@ endforeach()
 
 # Configuração para o arquivo C++ com SFML
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lsfml-graphics -lsfml-window -lsfml-system")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lsfml-graphics -lsfml-window -lsfml-system -lsfml-network -pthread")
 
 # Encontra a biblioteca SFML
-find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
+find_package(SFML 2.5 COMPONENTS system window graphics network REQUIRED)
 
 # Adiciona o executável para o arquivo C++ na pasta interface
 add_executable(sfml_app interface/sfml_app.cpp)
 set_target_properties(sfml_app PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Vincula o executável à biblioteca SFML
-target_link_libraries(sfml_app sfml-system sfml-window sfml-graphics)
+target_link_libraries(sfml_app sfml-system sfml-window sfml-graphics sfml-network)

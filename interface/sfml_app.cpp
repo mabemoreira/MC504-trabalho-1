@@ -1,14 +1,42 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
 #include <string>
 #include <filesystem>
+#include <iostream>
+#include <thread>
 
 #define MAX_PEOPLE 10
 #define MAX_CHEFS 10
+#define MAX_POTS 5
 
 namespace fs = std::filesystem;
+
+void receiveSignals()
+{
+    sf::TcpListener listener;
+    if (listener.listen(53000) != sf::Socket::Done) {
+        std::cerr << "Erro ao iniciar o servidor!" << std::endl;
+        return;
+    }
+
+    std::cout << "Servidor rodando na porta 53000..." << std::endl;
+
+    sf::TcpSocket client;
+    while (true) {
+        if (listener.accept(client) == sf::Socket::Done) {
+            char buffer[128];
+            std::size_t received;
+            if (client.receive(buffer, sizeof(buffer), received) == sf::Socket::Done) {
+                buffer[received] = '\0'; // Garante que a mensagem é uma string
+                std::string message(buffer);
+                std::cout << "Mensagem recebida: " << message << std::endl;
+            }
+        }
+    }
+}
 
 int main()
 {
@@ -22,6 +50,8 @@ int main()
     if (!font.loadFromFile("../assets/fonts/Minecraft.ttf"))
         return -1;
 
+    std::thread signalThread(receiveSignals);
+    signalThread.detach();
 
     // Lista os arquivos na pasta assets/customers
     std::vector<std::string> customerFiles;
@@ -70,31 +100,33 @@ int main()
     if (!chefTexture.loadFromFile("../assets/chef/chef_off.png"))
         return -1;
 
-    // Cria MAX_CHEFS sprites de panelas e chefs
+    // Cria MAX_CHEFS sprites de panelas
     for (int i = 0; i < MAX_CHEFS; ++i) {
         // Configura o sprite da panela
         potSprites[i].setTexture(potTexture);
 
-        // Define a posição para enfileirar verticalmente na direita
-        float potX = static_cast<float>(window.getSize().x - 200); // Posição horizontal fixa (200px da borda direita)
-        float potY = static_cast<float>(50 + i * 150); // Espaçamento vertical de 150px entre as panelas
+        // Define a posição para enfileirar horizontalmente no meio da tela
+        float potX = static_cast<float>(50 + i * 150); // Espaçamento horizontal de 150px entre as panelas
+        float potY = static_cast<float>(window.getSize().y / 2 - 50); // Centraliza verticalmente
         potSprites[i].setPosition(potX, potY);
 
-        potSprites[i].setScale(1.5f, 1.5f);
+        potSprites[i].setScale(3.0f, 3.0f);
 
-        // Configura o label da panela
         potLabels[i].setFont(font);
         potLabels[i].setString("Panela " + std::to_string(i + 1));
         potLabels[i].setCharacterSize(20);
         potLabels[i].setFillColor(sf::Color::Black);
         potLabels[i].setPosition(potX, potY - 30); // Posição acima do sprite
+    }
 
+    // Cria MAX_CHEFS sprites de chefs
+    for (int i = 0; i < MAX_CHEFS; ++i) {
         // Configura o sprite do chef
         chefSprites[i].setTexture(chefTexture);
 
-        // Define a posição do chef ao lado da panela
-        float chefX = potX + 120.0f; // Chef posicionado 120px à direita da panela
-        float chefY = potY;          // Alinha verticalmente com a panela
+        // Define a posição para enfileirar verticalmente na direita
+        float chefX = static_cast<float>(window.getSize().x - 200); // Posição fixa na direita
+        float chefY = static_cast<float>(50 + i * 150); // Espaçamento vertical de 150px entre os chefs
         chefSprites[i].setPosition(chefX, chefY);
 
         chefSprites[i].setScale(1.5f, 1.5f);
@@ -129,7 +161,7 @@ int main()
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                     if (closeButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
-                        window.close(); // Fecha a janela
+                        window.close();
                     }
                 }
             }
