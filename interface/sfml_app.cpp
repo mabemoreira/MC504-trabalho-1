@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <iostream>
 #include <thread>
+#include <map>
 
 #define MAX_PEOPLE 10
 #define MAX_CHEFS 10
@@ -14,7 +15,7 @@
 
 namespace fs = std::filesystem;
 
-void receiveSignals()
+void receiveSignals(std::map<std::string, bool>& signals)
 {
     sf::TcpListener listener;
     if (listener.listen(53000) != sf::Socket::Done) {
@@ -30,9 +31,13 @@ void receiveSignals()
             char buffer[128];
             std::size_t received;
             if (client.receive(buffer, sizeof(buffer), received) == sf::Socket::Done) {
-                buffer[received] = '\0'; // Garante que a mensagem é uma string
+                buffer[received] = '\0';
                 std::string message(buffer);
                 std::cout << "Mensagem recebida: " << message << std::endl;
+
+                if (message == "init"){
+                    signals["init"] = true;
+                }
             }
         }
     }
@@ -40,6 +45,18 @@ void receiveSignals()
 
 int main()
 {
+    std::map<std::string, bool> signals;
+
+    signals["init"] = false;
+
+    std::thread signalThread(receiveSignals, std::ref(signals));
+    signalThread.detach();
+
+    while (!signals["init"])
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    std::cout << "Iniciando Bandeco Simulator..." << std::endl;
+
     sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Bandeco Simulator", sf::Style::Fullscreen);
 
     // Inicializa o gerador de números aleatórios
@@ -49,9 +66,6 @@ int main()
     sf::Font font;
     if (!font.loadFromFile("../assets/fonts/Minecraft.ttf"))
         return -1;
-
-    std::thread signalThread(receiveSignals);
-    signalThread.detach();
 
     // Lista os arquivos na pasta assets/customers
     std::vector<std::string> customerFiles;

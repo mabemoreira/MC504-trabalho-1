@@ -102,8 +102,6 @@ void* f_aluno(void *v) {
 
 int main() {
 
-    sendMessageToServer("Hello from the client!");
-
     if (N_PORCOES <= 0){
         fprintf(stderr, "Como assim você não vai repor a comida em dia de feijoada? N_PORCOES deve ser maior que 0!\n");
         exit(EXIT_FAILURE);
@@ -120,6 +118,8 @@ int main() {
 
     sem_init(&panela_vazia, 0, 0);
     sem_init(&panela_cheia, 0, 0);
+
+    sendMessageToServer("init");
 
     for (int i = 0; i < N_COZINHEIROS; i++) {
         ids_cozinheiros[i] = i;
