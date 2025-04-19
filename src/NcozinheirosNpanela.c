@@ -95,12 +95,13 @@ void* f_aluno(void *v) {
             sleep(rand() % 3 + 1); 
         }
     }
-
+    
     printf("Aluno %d: terminei de comer %d vezes.\n", id, PORCOES_POR_ALUNO);
     return NULL;
 }
 
 int main() {
+    char message[128];
 
     if (N_PORCOES <= 0){
         fprintf(stderr, "Como assim você não vai repor a comida em dia de feijoada? N_PORCOES deve ser maior que 0!\n");
@@ -119,7 +120,8 @@ int main() {
     sem_init(&panela_vazia, 0, 0);
     sem_init(&panela_cheia, 0, 0);
 
-    sendMessageToServer("init");
+    snprintf(message, sizeof(message), "init %d %d %d %d", N_PORCOES, N_ALUNOS, N_COZINHEIROS, PORCOES_POR_ALUNO);
+    sendMessageToServer(message);
 
     for (int i = 0; i < N_COZINHEIROS; i++) {
         ids_cozinheiros[i] = i;

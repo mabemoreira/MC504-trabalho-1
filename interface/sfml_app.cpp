@@ -9,13 +9,9 @@
 #include <thread>
 #include <map>
 
-#define MAX_PEOPLE 10
-#define MAX_CHEFS 10
-#define MAX_POTS 5
-
 namespace fs = std::filesystem;
 
-void receiveSignals(std::map<std::string, bool>& signals)
+void receiveSignals(std::map<std::string, int>& signals)
 {
     sf::TcpListener listener;
     if (listener.listen(53000) != sf::Socket::Done) {
@@ -35,8 +31,23 @@ void receiveSignals(std::map<std::string, bool>& signals)
                 std::string message(buffer);
                 std::cout << "Mensagem recebida: " << message << std::endl;
 
-                if (message == "init"){
-                    signals["init"] = true;
+                std::vector<std::string> parsedMessage;
+                std::istringstream iss(message);
+                std::string palavra;
+                while (iss >> palavra)
+                    parsedMessage.push_back(palavra);
+                std::string command = parsedMessage[0];
+
+                if (command == "init") {
+                    signals["init"] = 1;
+                    signals["n_porcoes"] = std::stoi(parsedMessage[1]);
+                    signals["n_alunos"] = std::stoi(parsedMessage[2]);
+                    signals["n_chefs"] = std::stoi(parsedMessage[3]);
+                    signals["porcoes_por_aluno"] = std::stoi(parsedMessage[4]);
+
+                    std::cout << "Iniciando com " << signals["n_porcoes"] << " porções, "
+                              << signals["n_alunos"] << " alunos e "
+                              << signals["n_chefs"] << " chefs." << std::endl;
                 }
             }
         }
@@ -45,9 +56,14 @@ void receiveSignals(std::map<std::string, bool>& signals)
 
 int main()
 {
-    std::map<std::string, bool> signals;
+    std::map<std::string, int> signals;
 
-    signals["init"] = false;
+    signals["init"] = 0;
+    signals["end"] = 0;
+    signals["n_porcoes"] = 0;
+    signals["n_alunos"] = 0;
+    signals["n_chefs"] = 0;
+    signals["porcoes_por_aluno"] = 0;
 
     std::thread signalThread(receiveSignals, std::ref(signals));
     signalThread.detach();
@@ -74,16 +90,16 @@ int main()
             customerFiles.push_back(entry.path().string());
 
 
-    std::vector<sf::Texture> customerTextures(MAX_PEOPLE);
-    std::vector<sf::Sprite> customerSprites(MAX_PEOPLE);
-    std::vector<sf::Text> customerLabels(MAX_PEOPLE); // Labels para os clientes
-    std::vector<sf::Sprite> potSprites(MAX_CHEFS);
-    std::vector<sf::Text> potLabels(MAX_CHEFS); // Labels para as panelas
-    std::vector<sf::Sprite> chefSprites(MAX_CHEFS);
-    std::vector<sf::Text> chefLabels(MAX_CHEFS); // Labels para os chefs
+    std::vector<sf::Texture> customerTextures(signals["n_alunos"]);
+    std::vector<sf::Sprite> customerSprites(signals["n_alunos"]);
+    std::vector<sf::Text> customerLabels(signals["n_alunos"]); // Labels para os clientes
+    std::vector<sf::Sprite> potSprites(signals["n_chefs"]);
+    std::vector<sf::Text> potLabels(signals["n_chefs"]); // Labels para as panelas
+    std::vector<sf::Sprite> chefSprites(signals["n_chefs"]);
+    std::vector<sf::Text> chefLabels(signals["n_chefs"]); // Labels para os chefs
 
     // Carrega as texturas aleatoriamente da lista de arquivos de clientes
-    for (int i = 0; i < MAX_PEOPLE; ++i) {
+    for (int i = 0; i < signals["n_alunos"]; ++i) {
         int randomIndex = std::rand() % customerFiles.size();
         if (!customerTextures[i].loadFromFile(customerFiles[randomIndex]))
             return -1;
@@ -114,8 +130,8 @@ int main()
     if (!chefTexture.loadFromFile("../assets/chef/chef_off.png"))
         return -1;
 
-    // Cria MAX_CHEFS sprites de panelas
-    for (int i = 0; i < MAX_CHEFS; ++i) {
+    // Cria signals["n_chefs"] sprites de panelas
+    for (int i = 0; i < signals["n_chefs"]; ++i) {
         // Configura o sprite da panela
         potSprites[i].setTexture(potTexture);
 
@@ -133,8 +149,8 @@ int main()
         potLabels[i].setPosition(potX, potY - 30); // Posição acima do sprite
     }
 
-    // Cria MAX_CHEFS sprites de chefs
-    for (int i = 0; i < MAX_CHEFS; ++i) {
+    // Cria signals["n_chefs"] sprites de chefs
+    for (int i = 0; i < signals["n_chefs"]; ++i) {
         // Configura o sprite do chef
         chefSprites[i].setTexture(chefTexture);
 
@@ -184,19 +200,19 @@ int main()
         window.clear(sf::Color(246, 241, 230)); // Fundo bege
 
         // Desenha os sprites e labels dos clientes
-        for (int i = 0; i < MAX_PEOPLE; ++i) {
+        for (int i = 0; i < signals["n_alunos"]; ++i) {
             window.draw(customerSprites[i]);
             window.draw(customerLabels[i]);
         }
 
         // Desenha os sprites e labels das panelas
-        for (int i = 0; i < MAX_CHEFS; ++i) {
+        for (int i = 0; i < signals["n_chefs"]; ++i) {
             window.draw(potSprites[i]);
             window.draw(potLabels[i]);
         }
 
         // Desenha os sprites e labels dos chefs
-        for (int i = 0; i < MAX_CHEFS; ++i) {
+        for (int i = 0; i < signals["n_chefs"]; ++i) {
             window.draw(chefSprites[i]);
             window.draw(chefLabels[i]);
         }
