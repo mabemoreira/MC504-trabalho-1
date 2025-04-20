@@ -8,13 +8,14 @@
 #include <iostream>
 #include <thread>
 #include <map>
-#include <cmath> 
+#include <cmath>
 namespace fs = std::filesystem;
 
-void receiveSignals(std::map<std::string, int>& signals)
+void receiveSignals(std::map<std::string, int> &signals)
 {
     sf::TcpListener listener;
-    if (listener.listen(53002) != sf::Socket::Done) {
+    if (listener.listen(53002) != sf::Socket::Done)
+    {
         std::cerr << "Erro ao iniciar o servidor!" << std::endl;
         return;
     }
@@ -22,11 +23,14 @@ void receiveSignals(std::map<std::string, int>& signals)
     std::cout << "Servidor rodando na porta 53000..." << std::endl;
 
     sf::TcpSocket client;
-    while (true) {
-        if (listener.accept(client) == sf::Socket::Done) {
+    while (true)
+    {
+        if (listener.accept(client) == sf::Socket::Done)
+        {
             char buffer[128];
             std::size_t received;
-            if (client.receive(buffer, sizeof(buffer), received) == sf::Socket::Done) {
+            if (client.receive(buffer, sizeof(buffer), received) == sf::Socket::Done)
+            {
                 buffer[received] = '\0';
                 std::string message(buffer);
                 std::cout << "Mensagem recebida: " << message << std::endl;
@@ -38,7 +42,8 @@ void receiveSignals(std::map<std::string, int>& signals)
                     parsedMessage.push_back(palavra);
                 std::string command = parsedMessage[0];
 
-                if (command == "init") {
+                if (command == "init")
+                {
                     signals["init"] = 1;
                     signals["n_porcoes"] = std::stoi(parsedMessage[1]);
                     signals["n_alunos"] = std::stoi(parsedMessage[2]);
@@ -85,14 +90,13 @@ int main()
 
     // Lista os arquivos na pasta assets/customers
     std::vector<std::string> customerFiles;
-    for (const auto& entry : fs::directory_iterator("../assets/customers"))
+    for (const auto &entry : fs::directory_iterator("../assets/customers"))
         if (entry.is_regular_file())
             customerFiles.push_back(entry.path().string());
 
-
     std::vector<sf::Texture> customerTextures(signals["n_alunos"]);
     std::vector<sf::Sprite> customerSprites(signals["n_alunos"]);
-    std::vector<sf::Text> customerLabels(signals["n_alunos"]); // Labels para os clientes
+    std::vector<sf::Text> customerLabels(signals["n_alunos"]);         // Labels para os clientes
     std::vector<sf::Vector2f> customerVelocities(signals["n_alunos"]); // Add this line
     std::vector<sf::Sprite> potSprites(signals["n_chefs"]);
     std::vector<sf::Text> potLabels(signals["n_chefs"]); // Labels para as panelas
@@ -101,7 +105,8 @@ int main()
 
     // Carrega as texturas aleatoriamente da lista de arquivos de clientes
     float customerSpeed = 20.0f; // Velocidade dos clientes
-    for (int i = 0; i < signals["n_alunos"]; ++i) {
+    for (int i = 0; i < signals["n_alunos"]; ++i)
+    {
         int randomIndex = std::rand() % customerFiles.size();
         if (!customerTextures[i].loadFromFile(customerFiles[randomIndex]))
             return -1;
@@ -137,12 +142,13 @@ int main()
         return -1;
 
     // Cria signals["n_chefs"] sprites de panelas
-    for (int i = 0; i < signals["n_chefs"]; ++i) {
+    for (int i = 0; i < signals["n_chefs"]; ++i)
+    {
         // Configura o sprite da panela
         potSprites[i].setTexture(potTexture);
 
         // Define a posição para enfileirar horizontalmente no meio da tela
-        float potX = static_cast<float>(50 + i * 150); // Espaçamento horizontal de 150px entre as panelas
+        float potX = static_cast<float>(50 + i * 150);                // Espaçamento horizontal de 150px entre as panelas
         float potY = static_cast<float>(window.getSize().y / 2 - 50); // Centraliza verticalmente
         potSprites[i].setPosition(potX, potY);
 
@@ -156,13 +162,14 @@ int main()
     }
 
     // Cria signals["n_chefs"] sprites de chefs
-    for (int i = 0; i < signals["n_chefs"]; ++i) {
+    for (int i = 0; i < signals["n_chefs"]; ++i)
+    {
         // Configura o sprite do chef
         chefSprites[i].setTexture(chefTexture);
 
         // Define a posição para enfileirar verticalmente na direita
         float chefX = static_cast<float>(window.getSize().x - 200); // Posição fixa na direita
-        float chefY = static_cast<float>(50 + i * 150); // Espaçamento vertical de 150px entre os chefs
+        float chefY = static_cast<float>(50 + i * 150);             // Espaçamento vertical de 150px entre os chefs
         chefSprites[i].setPosition(chefX, chefY);
 
         chefSprites[i].setScale(1.5f, 1.5f);
@@ -187,78 +194,92 @@ int main()
 
     sf::Clock clock; // Create an SFML clock to track time
 
-    while (window.isOpen()) 
+    while (window.isOpen())
     {
         sf::Event event;
-        while (window.pollEvent(event)) {
+        while (window.pollEvent(event))
+        {
             if (event.type == sf::Event::Closed)
                 window.close();
 
             // Verifica se o botão foi clicado
-            if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                if (event.mouseButton.button == sf::Mouse::Left)
+                {
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                    if (closeButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
+                    if (closeButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+                    {
                         window.close();
                     }
                 }
             }
-    float deltaTime = clock.restart().asSeconds(); // Get time delta
+            float deltaTime = clock.restart().asSeconds(); // Get time delta
 
-        // --- Update customer positions (Add this section) ---
-    for (int i = 0; i < signals["n_alunos"]; ++i) {
-        customerSprites[i].move(customerVelocities[i] * deltaTime);
+            // --- Update customer positions (Add this section) ---
+            for (int i = 0; i < signals["n_alunos"]; ++i)
+            {
+                customerSprites[i].move(customerVelocities[i] * deltaTime);
 
-        // Boundary check
-        sf::FloatRect bounds = customerSprites[i].getGlobalBounds();
-        sf::Vector2f pos = customerSprites[i].getPosition();
+                // Boundary check
+                sf::FloatRect bounds = customerSprites[i].getGlobalBounds();
+                sf::Vector2f pos = customerSprites[i].getPosition();
 
-        // Check horizontal bounds
-        if (pos.x < 0) {
-            customerVelocities[i].x = std::abs(customerVelocities[i].x); // Move right
-            customerSprites[i].setPosition(0, pos.y); // Correct position
-        } else if (pos.x + bounds.width > window.getSize().x) {
-            customerVelocities[i].x = -std::abs(customerVelocities[i].x); // Move left
-            customerSprites[i].setPosition(window.getSize().x - bounds.width, pos.y); // Correct position
+                // Check horizontal bounds
+                if (pos.x < 0)
+                {
+                    customerVelocities[i].x = std::abs(customerVelocities[i].x); // Move right
+                    customerSprites[i].setPosition(0, pos.y);                    // Correct position
+                }
+                else if (pos.x + bounds.width > window.getSize().x)
+                {
+                    customerVelocities[i].x = -std::abs(customerVelocities[i].x);             // Move left
+                    customerSprites[i].setPosition(window.getSize().x - bounds.width, pos.y); // Correct position
+                }
+
+                // Check vertical bounds
+                if (pos.y < 0)
+                {
+                    customerVelocities[i].y = std::abs(customerVelocities[i].y); // Move down
+                    customerSprites[i].setPosition(pos.x, 0);                    // Correct position
+                }
+                else if (pos.y + bounds.height > window.getSize().y)
+                {
+                    customerVelocities[i].y = -std::abs(customerVelocities[i].y);              // Move up
+                    customerSprites[i].setPosition(pos.x, window.getSize().y - bounds.height); // Correct position
+                }
+
+                // Update label position to follow the sprite
+                customerLabels[i].setPosition(customerSprites[i].getPosition().x, customerSprites[i].getPosition().y - 30);
+            }
+
+            window.clear(sf::Color(246, 241, 230)); // Fundo bege
+
+            // Desenha os sprites e labels dos clientes
+            for (int i = 0; i < signals["n_alunos"]; ++i)
+            {
+                window.draw(customerSprites[i]);
+                window.draw(customerLabels[i]);
+            }
+
+            // Desenha os sprites e labels das panelas
+            for (int i = 0; i < signals["n_chefs"]; ++i)
+            {
+                window.draw(potSprites[i]);
+                window.draw(potLabels[i]);
+            }
+
+            // Desenha os sprites e labels dos chefs
+            for (int i = 0; i < signals["n_chefs"]; ++i)
+            {
+                window.draw(chefSprites[i]);
+                window.draw(chefLabels[i]);
+            }
+
+            // Desenha o botão de fechar
+            window.draw(closeButton);
+            window.display();
         }
-
-        // Check vertical bounds
-        if (pos.y < 0) {
-            customerVelocities[i].y = std::abs(customerVelocities[i].y); // Move down
-             customerSprites[i].setPosition(pos.x, 0); // Correct position
-        } else if (pos.y + bounds.height > window.getSize().y) {
-            customerVelocities[i].y = -std::abs(customerVelocities[i].y); // Move up
-             customerSprites[i].setPosition(pos.x, window.getSize().y - bounds.height); // Correct position
-        }
-
-        // Update label position to follow the sprite
-        customerLabels[i].setPosition(customerSprites[i].getPosition().x, customerSprites[i].getPosition().y - 30);
-    }
-
-        window.clear(sf::Color(246, 241, 230)); // Fundo bege
-
-        // Desenha os sprites e labels dos clientes
-        for (int i = 0; i < signals["n_alunos"]; ++i) {
-            window.draw(customerSprites[i]);
-            window.draw(customerLabels[i]);
-        }
-
-        // Desenha os sprites e labels das panelas
-        for (int i = 0; i < signals["n_chefs"]; ++i) {
-            window.draw(potSprites[i]);
-            window.draw(potLabels[i]);
-        }
-
-        // Desenha os sprites e labels dos chefs
-        for (int i = 0; i < signals["n_chefs"]; ++i) {
-            window.draw(chefSprites[i]);
-            window.draw(chefLabels[i]);
-        }
-
-        // Desenha o botão de fechar
-        window.draw(closeButton);
-        window.display();
     }
     return 0;
-}
 }
