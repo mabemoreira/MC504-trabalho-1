@@ -11,7 +11,7 @@
 #define N_PORCOES 3
 #define N_ALUNOS 7
 #define PORCOES_POR_ALUNO 10
-#define N_COZINHEIROS 2
+#define N_COZINHEIROS 5
 
 volatile int panelas[N_COZINHEIROS]; // guarda quanto tem na panela i
 volatile int acabaram = 0;
