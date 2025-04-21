@@ -178,7 +178,6 @@ bool returnChefToRest(sf::Sprite& chefSprite, sf::Text& chefLabel, sf::Texture& 
         chefLabel.setString("Chef " + std::to_string(chefIndex + 1));
     } else {
         // Se o cliente chegou à panela, atualiza a posição do label
-        std::string currentLabelText = chefLabel.getString();
         chefLabel.setString("Chef " + std::to_string(chefIndex + 1) + " (Indo descansar)");
     }
     return result;
