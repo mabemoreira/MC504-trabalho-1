@@ -47,6 +47,9 @@ void sendMessageToServer(const char* message) {
 }
 
 void putServingsInPot(int id) {
+    char message[128];
+    snprintf(message, sizeof(message), "putServingsInPot %d %d", id, N_PORCOES);
+    sendMessageToServer(message);
     sleep(1); 
     panelas[id] = N_PORCOES;
     printf("O cozinheiro %d colocou %d porções na sua panela\n", id, N_PORCOES);
@@ -56,9 +59,15 @@ void putServingsInPot(int id) {
 void* f_cozinheiro(void *v) {
     int id = *(int*) v;
     int recarreguei = 0;
+    char message[128];
     while (1) {
         sem_wait(&panela_vazia);
+        snprintf(message, sizeof(message), "noFood %d", id);
+        sendMessageToServer(message);
+
         if (acabaram) {
+            snprintf(message, sizeof(message), "returnChefToRest %d", id);
+            sendMessageToServer(message);
             printf("O cozinheiro %d está indo embora, ele recarregou sua panela %d vezes.\n", id, recarreguei);
             break;
         }
@@ -71,11 +80,14 @@ void* f_cozinheiro(void *v) {
 void* f_aluno(void *v) {
     int id = *(int*) v;
     int porcoes_comidas = 0;
+    char message[128];
     while (porcoes_comidas < PORCOES_POR_ALUNO) {
         int conseguiu_comer = 0;
         for (int i = 0; i < N_COZINHEIROS; i++) {
             sem_wait(&mutex[i]);
             if (panelas[i] > 0) {
+                snprintf(message, sizeof(message), "getFood %d %d", id, i);
+                sendMessageToServer(message);
                 panelas[i]--;
                 porcoes_comidas++;
                 printf("Aluno %d: pegou da panela %d. (Refeição %d/%d) Porções restantes nessa panela: %d\n",
@@ -151,5 +163,9 @@ int main() {
     sem_destroy(&panela_cheia);
 
     printf("Muçamos! Todos os alunos comeram %d vezes.\n", PORCOES_POR_ALUNO);
+
+    snprintf(message, sizeof(message), "end");
+    sendMessageToServer(message);
+
     return 0;
 }
