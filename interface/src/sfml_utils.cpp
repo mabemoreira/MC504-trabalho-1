@@ -72,11 +72,11 @@ void receiveSignals(std::map<std::string, int> &signals, std::vector<Customer> &
                     for (auto &chef : chefs)
                         if (chef.getId() == std::stoi(parsedMessage[1]))
                         {
-                            chef.setMoving(true);
-                            chef.setEating(false);
-                            chef.setLeaving(true);
-                            chef.setTargetPot(-1);
-                            chef.setEatingTimer(0.0f);
+                            // chef.setMoving(true);
+                            // chef.setEating(false);
+                            // chef.setLeaving(true);
+                            // chef.setTargetPot(-1);
+                            // chef.setEatingTimer(0.0f);
                             break;
                         }
                 }
@@ -85,11 +85,11 @@ void receiveSignals(std::map<std::string, int> &signals, std::vector<Customer> &
                     for (auto &customer : customers)
                         if (customer.getId() == std::stoi(parsedMessage[1]))
                         {
-                            customer.setMoving(true);
-                            customer.setEating(false);
-                            customer.setLeaving(true);
-                            customer.setTargetPot(-1);
-                            customer.setEatingTimer(0.0f);
+                            // customer.setMoving(true);
+                            // customer.setEating(false);
+                            // customer.setLeaving(true);
+                            // customer.setTargetPot(-1);
+                            // customer.setEatingTimer(0.0f);
                             break;
                         }
                     
@@ -121,7 +121,6 @@ sf::Font loadFont(const std::string& fontPath)
 
 std::vector<std::string> getCustomerFiles()
 {
-    std::cout << "Diretório atual: " << fs::current_path() << std::endl;
     std::vector<std::string> customerFiles;
     for (const auto &entry : fs::directory_iterator("../assets/customers"))
         if (entry.is_regular_file())

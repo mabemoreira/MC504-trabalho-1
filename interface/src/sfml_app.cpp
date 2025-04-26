@@ -181,27 +181,16 @@ int main()
     sf::Font font = loadFont("../assets/fonts/Minecraft.ttf");
     std::vector<std::string> customerFiles = getCustomerFiles(); // Lista os arquivos na pasta assets/customers
 
-    for (int i = 0; i < signals["n_alunos"]; i++) {
+    for (int i = 0; i < signals["n_alunos"]; ++i)
         customers.emplace_back(i, customerFiles, font, window);
-        customers[i].printAttributes(); // Imprime os atributos do cliente
-    }
+    for (int i = 0; i < signals["n_chefs"]; ++i)
+        chefs.emplace_back(i, font);
 
     std::vector<sf::Sprite> potSprites(signals["n_chefs"]);
     std::vector<sf::Text> potLabels(signals["n_chefs"]); // Labels para as panelas
-    std::vector<sf::Sprite> chefSprites(signals["n_chefs"]);
-    std::vector<sf::Text> chefLabels(signals["n_chefs"]);     // Labels para os chefs
     std::vector<sf::Sprite> foodSprites(signals["n_alunos"]); // Sprites para os alimentos
-    // Estruturas para controlar o estado de cada cliente
-    // Adicione estas estruturas logo após a criação dos outros vetores de controle
-    // Estruturas para controlar o estado de cada chef
-    std::vector<int> chefState(signals["n_chefs"], 0);               // 0: descansando, 1: indo para panela, 2: cozinhando, 3: retornando
-    std::vector<int> chefTargetPot(signals["n_chefs"], -1);          // -1 significa sem panela alvo
-    std::vector<float> chefCookingTimer(signals["n_chefs"], 0.0f);   // Tempo restante cozinhando
-    std::vector<float> chefRestTimer(signals["n_chefs"], 0.0f);      // Tempo restante descansando
-    std::vector<sf::Vector2f> chefRestPositions(signals["n_chefs"]); // Posições iniciais/de descanso
 
-
-    for (int i = 0; i < signals["n_alunos"]; i++)
+    for (int i = 0; i < signals["n_alunos"]; ++i)
     {
         int randomIndex = std::rand() % customerFiles.size();
         if (!customers[i].getTexture().loadFromFile(customerFiles[randomIndex]))
@@ -285,30 +274,30 @@ int main()
     for (int i = 0; i < signals["n_chefs"]; ++i)
     {
         // Configura o sprite do chef
-        chefSprites[i].setTexture(chefTexture);
+        chefs[i].getSprite().setTexture(chefTexture);
 
         // Define a posição para enfileirar verticalmente na direita
         float chefX = static_cast<float>(window.getSize().x - 200); // Posição fixa na direita
         float chefY = static_cast<float>(50 + i * 150);             // Espaçamento vertical de 150px entre os chefs
-        chefSprites[i].setPosition(chefX, chefY);
+        chefs[i].getSprite().setPosition(chefX, chefY);
 
-        chefSprites[i].setScale(1.5f, 1.5f);
+        chefs[i].getSprite().setScale(1.5f, 1.5f);
 
         // Configura o label do chef
-        chefLabels[i].setFont(font);
-        chefLabels[i].setString("Chef " + std::to_string(i + 1));
-        chefLabels[i].setCharacterSize(20);
-        chefLabels[i].setFillColor(sf::Color::Black);
-        chefLabels[i].setPosition(chefX, chefY - 30); // Posição acima do sprite
+        chefs[i].getLabel().setFont(font);
+        chefs[i].getLabel().setString("Chef " + std::to_string(i + 1));
+        chefs[i].getLabel().setCharacterSize(20);
+        chefs[i].getLabel().setFillColor(sf::Color::Black);
+        chefs[i].getLabel().setPosition(chefX, chefY - 30); // Posição acima do sprite
     }
 
     // Guarde as posições iniciais dos chefs
     for (int i = 0; i < signals["n_chefs"]; ++i)
     {
-        chefRestPositions[i] = chefSprites[i].getPosition();
+        chefs[i].setRestPosition(chefs[i].getSprite().getPosition());
 
         // Inicie com tempo de descanso aleatório para que eles não se movam todos ao mesmo tempo
-        chefRestTimer[i] = static_cast<float>(std::rand() % 5) + 3.0f;
+        chefs[i].setRestTimer(static_cast<float>(std::rand() % 5) + 3.0f);
     }
 
     // Carrega a textura do botão de fechar
@@ -437,65 +426,64 @@ int main()
         for (int i = 0; i < signals["n_chefs"]; ++i)
         {
             // Estado 0: Chef está descansando
-            if (chefState[i] == 0)
+            if (chefs[i].getState() == 0)
             {
-                chefRestTimer[i] -= deltaTime;
+                chefs[i].decreaseRestTimer(deltaTime);
 
                 // Se terminou o descanso
-                if (chefRestTimer[i] <= 0.0f)
+                if (chefs[i].getRestTimer() <= 0.0f)
                 {
                     // Escolhe uma panela aleatória (ou pode ser a própria panela do chef)
-                    chefTargetPot[i] = i; // Cada chef cuida de sua própria panela
-                    chefState[i] = 1;     // Muda para estado "indo para panela"
-                    std::cout << "Chef " << (i + 1) << " está indo para a panela " << (chefTargetPot[i] + 1) << std::endl;
+                    chefs[i].setTargetPot(i); // Cada chef cuida de sua própria panela
+                    chefs[i].setState(1);     // Muda para estado "indo para panela"
+                    std::cout << "Chef " << (i + 1) << " está indo para a panela " << (chefs[i].getTargetPot() + 1) << std::endl;
                 }
             }
 
             // Estado 1: Chef está indo para a panela
-            else if (chefState[i] == 1)
+            else if (chefs[i].getState() == 1)
             {
-                bool reached = moveChefToPot(chefSprites[i], chefLabels[i], activeChefTexture, potSprites[chefTargetPot[i]],
+                bool reached = moveChefToPot(chefs[i].getSprite(), chefs[i].getLabel(), activeChefTexture, potSprites[chefs[i].getTargetPot()],
                                                 chefSpeed, deltaTime, i);
 
                 // Se chegou à panela
                 if (reached)
                 {
-                    chefState[i] = 2;                                                 // Muda para estado "cozinhando"
-                    chefCookingTimer[i] = 3.0f + static_cast<float>(std::rand() % 2); // 3-5 segundos cozinhando
-                    std::cout << "Chef " << (i + 1) << " está cozinhando na panela " << (chefTargetPot[i] + 1) << std::endl;
+                    chefs[i].setState(2);                                                 // Muda para estado "cozinhando"
+                    chefs[i].setCookingTimer(3.0f + static_cast<float>(std::rand() % 2)); // 3-5 segundos cozinhando
+                    std::cout << "Chef " << (i + 1) << " está cozinhando na panela " << (chefs[i].getTargetPot() + 1) << std::endl;
                 }
             }
 
             // Estado 2: Chef está cozinhando
-            else if (chefState[i] == 2)
+            else if (chefs[i].getState() == 2)
             {
-                chefCookingTimer[i] -= deltaTime;
+                chefs[i].decreaseCookingTimer(deltaTime);
 
                 // Se terminou de cozinhar
-                if (chefCookingTimer[i] <= 0.0f)
+                if (chefs[i].getCookingTimer() <= 0.0f)
                 {
-                    chefState[i] = 3; // Muda para estado "retornando"
+                    chefs[i].setState(3); // Muda para estado "retornando"
                     std::cout << "Chef " << (i + 1) << " está retornando ao descanso" << std::endl;
                 }
             }
 
             // Estado 3: Chef está retornando ao descanso
-            else if (chefState[i] == 3)
+            else if (chefs[i].getState() == 3)
             {
-                bool returned = returnChefToRest(chefSprites[i], chefLabels[i], returningChefTexture, chefTexture, chefSpeed,
-                                                    deltaTime, i, chefRestPositions[i]);
+                bool returned = returnChefToRest(chefs[i].getSprite(), chefs[i].getLabel(), returningChefTexture, chefTexture, chefSpeed, deltaTime, i, chefs[i].getRestPosition());
 
                 // Se chegou ao local de descanso
                 if (returned)
                 {
-                    chefState[i] = 0;                                              // Muda para estado "descansando"
-                    chefRestTimer[i] = 5.0f + static_cast<float>(std::rand() % 5); // 5-10 segundos descansando
+                    chefs[i].setState(0);                                              // Muda para estado "descansando"
+                    chefs[i].setRestTimer(5.0f + static_cast<float>(std::rand() % 5)); // 5-10 segundos descansando
                     std::cout << "Chef " << (i + 1) << " está descansando" << std::endl;
                 }
             }
 
             // Atualiza a posição do label do chef
-            chefLabels[i].setPosition(chefSprites[i].getPosition().x, chefSprites[i].getPosition().y - 30);
+            chefs[i].getLabel().setPosition(chefs[i].getSprite().getPosition().x, chefs[i].getSprite().getPosition().y - 30);
         }
         window.clear(sf::Color(246, 241, 230)); // Fundo bege
 
@@ -525,8 +513,8 @@ int main()
         // Desenha os sprites e labels dos chefs
         for (int i = 0; i < signals["n_chefs"]; ++i)
         {
-            window.draw(chefSprites[i]);
-            window.draw(chefLabels[i]);
+            window.draw(chefs[i].getSprite());
+            window.draw(chefs[i].getLabel());
         }
 
         // Desenha o botão de fechar
