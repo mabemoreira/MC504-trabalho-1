@@ -2,11 +2,20 @@
 #define CUSTOMER_HPP
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
 #include <string>
 #include <filesystem>
-
+#include <iostream>
+#include <thread>
+#include <map>
+#include <cmath>
 
 namespace fs = std::filesystem;
+using namespace std;
 
 class Customer {
 private:
@@ -24,11 +33,12 @@ private:
 
 public:
 
-    Customer(const int index_customer, std::vector<std::string>& customerFiles, const sf::Font& font, sf::RenderWindow& window);
+    Customer(int index_customer, std::vector<std::string> customerFiles, const sf::Font& font, sf::RenderWindow& window);
 
     sf::Sprite& getSprite() { return this->sprite; }
     sf::Text& getLabel() { return this->label; }
     sf::Vector2f& getVelocity() { return this->velocity; }
+    sf::Texture& getTexture() { return this->texture; }
     bool isMoving() const { return moving; }
     bool isEating() const { return eating; }
     bool isLeaving() const { return leaving; }
@@ -45,6 +55,8 @@ public:
     void setEatingTimer(float eatingTimer) { this->eatingTimer = eatingTimer; }
 
     void decreaseEatingTimer(float deltaTime) { this->eatingTimer -= deltaTime; }
+
+    void printAttributes() const;
 
     ~Customer();
 };

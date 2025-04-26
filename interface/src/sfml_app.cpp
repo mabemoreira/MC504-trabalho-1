@@ -177,14 +177,20 @@ int main()
     sf::Font font = loadFont("../assets/fonts/Minecraft.ttf");
     std::vector<std::string> customerFiles = getCustomerFiles(); // Lista os arquivos na pasta assets/customers
 
-    for (const auto &file : customerFiles)
-    {
-        std::cout << "Customer file: " << file << std::endl;
-    }
-
     std::vector<Customer> customers;
-    for (int i = 0; i < signals["n_alunos"]; i++)
+    for (int i = 0; i < signals["n_alunos"]; i++) {
         customers.emplace_back(i, customerFiles, font, window);
+    
+        // Carrega a textura explicitamente
+        int randomIndex = std::rand() % customerFiles.size();
+        if (!customers[i].getTexture().loadFromFile(customerFiles[randomIndex])) {
+            std::cerr << "Erro ao carregar textura para cliente " << i + 1 << std::endl;
+            return -1;
+        }
+    
+        customers[i].getSprite().setTexture(customers[i].getTexture());
+        customers[i].printAttributes(); // Imprime os atributos do cliente
+    }
 
     std::vector<sf::Sprite> potSprites(signals["n_chefs"]);
     std::vector<sf::Text> potLabels(signals["n_chefs"]); // Labels para as panelas
@@ -199,6 +205,22 @@ int main()
     std::vector<float> chefCookingTimer(signals["n_chefs"], 0.0f);   // Tempo restante cozinhando
     std::vector<float> chefRestTimer(signals["n_chefs"], 0.0f);      // Tempo restante descansando
     std::vector<sf::Vector2f> chefRestPositions(signals["n_chefs"]); // Posições iniciais/de descanso
+
+
+    for (int i = 0; i < signals["n_alunos"]; i++)
+    {
+        int randomIndex = std::rand() % customerFiles.size();
+        if (!customers[i].getTexture().loadFromFile(customerFiles[randomIndex]))
+            return -1;
+
+        customers[i].getSprite().setTexture(customers[i].getTexture());
+
+        customers[i].getSprite().setOrigin(customers[i].getSprite().getGlobalBounds().width / 2, customers[i].getSprite().getGlobalBounds().height / 2);
+        float x = static_cast<float>(std::rand() % window.getSize().x);
+        float y = static_cast<float>(std::rand() % window.getSize().y);
+        customers[i].getSprite().setPosition(x, y);
+    }
+
 
     // Velocidade dos chefs
     float chefSpeed = 120.0f;
