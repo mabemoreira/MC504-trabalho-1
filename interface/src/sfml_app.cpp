@@ -11,6 +11,7 @@
 #include <cmath>
 #include "../include/sfml_utils.hpp"
 #include "../include/Customer.hpp"
+#include "../include/Chef.hpp"
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -162,7 +163,10 @@ int main()
     signals["n_chefs"] = 0;
     signals["porcoes_por_aluno"] = 0;
 
-    std::thread signalThread(receiveSignals, std::ref(signals));
+    std::vector<Customer> customers;
+    std::vector<Chef> chefs;
+
+    std::thread signalThread(receiveSignals, std::ref(signals), std::ref(customers), std::ref(chefs));
     signalThread.detach();
 
     while (!signals["init"])
@@ -177,18 +181,8 @@ int main()
     sf::Font font = loadFont("../assets/fonts/Minecraft.ttf");
     std::vector<std::string> customerFiles = getCustomerFiles(); // Lista os arquivos na pasta assets/customers
 
-    std::vector<Customer> customers;
     for (int i = 0; i < signals["n_alunos"]; i++) {
         customers.emplace_back(i, customerFiles, font, window);
-    
-        // Carrega a textura explicitamente
-        int randomIndex = std::rand() % customerFiles.size();
-        if (!customers[i].getTexture().loadFromFile(customerFiles[randomIndex])) {
-            std::cerr << "Erro ao carregar textura para cliente " << i + 1 << std::endl;
-            return -1;
-        }
-    
-        customers[i].getSprite().setTexture(customers[i].getTexture());
         customers[i].printAttributes(); // Imprime os atributos do cliente
     }
 

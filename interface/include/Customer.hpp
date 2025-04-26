@@ -28,6 +28,7 @@ private:
     bool moving;
     bool eating;
     bool leaving;
+    int id;
     int targetPot; // -1 significa sem panela alvo
     float eatingTimer; // Tempo restante comendo
 
@@ -44,6 +45,7 @@ public:
     bool isLeaving() const { return leaving; }
     int getTargetPot() const { return this->targetPot; }
     float getEatingTimer() const { return this->eatingTimer; }
+    int getId() const { return this->id; }
 
     void setSprite(const sf::Sprite& sprite) { this->sprite = sprite; }
     void setLabel(const sf::Text& label) { this->label = label; }

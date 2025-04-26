@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 using namespace std;
 
 Customer::Customer(int index_customer, std::vector<std::string> customerFiles, const sf::Font& font, sf::RenderWindow& window)
-    : moving(false), eating(false), leaving(false), targetPot(-1), eatingTimer(0.0f)
+    : moving(false), eating(false), leaving(false), targetPot(-1), eatingTimer(0.0f), id(index_customer)
 {
     std::srand(std::time(nullptr)); // Inicializa o gerador de números aleatórios
 

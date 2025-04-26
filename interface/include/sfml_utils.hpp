@@ -12,9 +12,11 @@
 #include <thread>
 #include <map>
 #include <cmath>
+#include "../include/Customer.hpp"
+#include "../include/Chef.hpp"
 
 // Network
-void receiveSignals(std::map<std::string, int>& signals);
+void receiveSignals(std::map<std::string, int> &signals, std::vector<Customer> &customers, std::vector<Chef> &chefs);
 
 // Fontes
 sf::Font loadFont(const std::string& fontPath);

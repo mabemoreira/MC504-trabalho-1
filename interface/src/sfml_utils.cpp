@@ -9,10 +9,12 @@
 #include <thread>
 #include <map>
 #include <cmath>
+#include "../include/Customer.hpp"
+#include "../include/Chef.hpp"
 namespace fs = std::filesystem;
 using namespace std;
 
-void receiveSignals(std::map<std::string, int> &signals)
+void receiveSignals(std::map<std::string, int> &signals, std::vector<Customer> &customers, std::vector<Chef> &chefs)
 {
     sf::TcpListener listener;
     if (listener.listen(53002) != sf::Socket::Done)
@@ -67,11 +69,30 @@ void receiveSignals(std::map<std::string, int> &signals)
                 }
                 else if (command == "returnChefToRest")
                 {
-                    signals["returnChefToRest"] = std::stoi(parsedMessage[1]);
+                    for (auto &chef : chefs)
+                        if (chef.getId() == std::stoi(parsedMessage[1]))
+                        {
+                            chef.setMoving(true);
+                            chef.setEating(false);
+                            chef.setLeaving(true);
+                            chef.setTargetPot(-1);
+                            chef.setEatingTimer(0.0f);
+                            break;
+                        }
                 }
                 else if (command == "returnCostumerToRest")
                 {
-                    // returnCostumerToRest();
+                    for (auto &customer : customers)
+                        if (customer.getId() == std::stoi(parsedMessage[1]))
+                        {
+                            customer.setMoving(true);
+                            customer.setEating(false);
+                            customer.setLeaving(true);
+                            customer.setTargetPot(-1);
+                            customer.setEatingTimer(0.0f);
+                            break;
+                        }
+                    
                 }
                 
                 else if (command == "noFood")
