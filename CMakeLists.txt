@@ -24,9 +24,18 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lsfml-graphics -lsfml-window -lsfml-sys
 # Encontra a biblioteca SFML
 find_package(SFML 2.5 COMPONENTS system window graphics network REQUIRED)
 
+# Busca recursivamente todos os arquivos .cpp na pasta interface
+file(GLOB_RECURSE INTERFACE_SOURCES interface/*.cpp)
+
 # Adiciona o executável para o arquivo C++ na pasta interface
-add_executable(sfml_app interface/sfml_app.cpp)
+# add_executable(sfml_app interface/sfml_app.cpp interface/sfml_utils.cpp interface/Customers.cpp)
+add_executable(sfml_app ${INTERFACE_SOURCES})
 set_target_properties(sfml_app PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Vincula o executável à biblioteca SFML
 target_link_libraries(sfml_app sfml-system sfml-window sfml-graphics sfml-network)
+
+# Configuração para Debug
+# set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_C_FLAGS_DEBUG "-g")
+# set(CMAKE_CXX_FLAGS_DEBUG "-g")

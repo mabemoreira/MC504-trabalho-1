@@ -94,6 +94,7 @@ void* f_aluno(void *v) {
                        id, i, porcoes_comidas, PORCOES_POR_ALUNO, panelas[i]);
                 conseguiu_comer = 1;
                 sem_post(&mutex[i]);
+                snprintf(message, sizeof(message), "returnCostumerToRest %d", id);
                 break;
             }
             sem_post(&mutex[i]);
