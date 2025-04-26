@@ -72,11 +72,8 @@ void receiveSignals(std::map<std::string, int> &signals, std::vector<Customer> &
                     for (auto &chef : chefs)
                         if (chef.getId() == std::stoi(parsedMessage[1]))
                         {
-                            // chef.setMoving(true);
-                            // chef.setEating(false);
-                            // chef.setLeaving(true);
-                            // chef.setTargetPot(-1);
-                            // chef.setEatingTimer(0.0f);
+                            chef.setState(3);
+                            chef.setTargetPot(-1);
                             break;
                         }
                 }
@@ -85,6 +82,7 @@ void receiveSignals(std::map<std::string, int> &signals, std::vector<Customer> &
                     for (auto &customer : customers)
                         if (customer.getId() == std::stoi(parsedMessage[1]))
                         {
+                            // Não funciona muito bem ainda
                             // customer.setMoving(true);
                             // customer.setEating(false);
                             // customer.setLeaving(true);
@@ -97,6 +95,13 @@ void receiveSignals(std::map<std::string, int> &signals, std::vector<Customer> &
                 
                 else if (command == "noFood")
                 {
+                    for (auto &chef: chefs)
+                        if (chef.getId() == std::stoi(parsedMessage[1]))
+                        {
+                            // chef.setState(1);
+                            // chef.setTargetPot(-1);
+                            break;
+                        }
                 }
                 else if (command == "getFood")
                 {
