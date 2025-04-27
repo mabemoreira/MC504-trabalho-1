@@ -138,6 +138,7 @@ bool returnChefToRest(sf::Sprite &chefSprite, sf::Text &chefLabel, sf::Texture &
     chefSprite.setScale(1.5f, 1.5f);
 
     bool result = moveTowards(chefSprite, inicialPos, chefVelocity, deltaTime);
+    chefLabel.setPosition(chefSprite.getPosition().x, chefSprite.getPosition().y - 30);
 
     if (result)
     {
