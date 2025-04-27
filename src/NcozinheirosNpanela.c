@@ -10,15 +10,50 @@
 
 #define N_PORCOES 3
 #define N_ALUNOS 7
-#define PORCOES_POR_ALUNO 10
+#define PORCOES_POR_ALUNO 2
 #define N_COZINHEIROS 5
 
-volatile int panelas[N_COZINHEIROS]; // guarda quanto tem na panela i
+volatile int panelas[N_COZINHEIROS];
 volatile int acabaram = 0;
 
-sem_t mutex[N_COZINHEIROS];  // q tb é o número de panelas, já que cada cozinheiro enche a sua       
-sem_t panela_vazia;                
-sem_t panela_cheia;      
+int porcoes_comidas[N_ALUNOS];
+int estado_aluno[N_ALUNOS]; // 0 = esperando, 1 = comendo, -1 = finalizado
+int estado_cozinheiro[N_COZINHEIROS]; // 0 = dormindo, 1 = cozinhando
+
+pthread_mutex_t mutex[N_COZINHEIROS];  // mutex para cada panela
+sem_t panela_vazia;
+sem_t panela_cheia;
+pthread_mutex_t mutex_print;  
+
+void print_estado_global() {
+    pthread_mutex_lock(&mutex_print);
+    printf("\n------------------------------\n");
+    for (int i = 0; i < N_COZINHEIROS; i++) {
+        printf("Panela %d: [", i);
+        for (int j = 0; j < panelas[i]; j++) printf("\xF0\x9F\xA5\x98  ");
+        printf("] (%d/%d)\n", panelas[i], N_PORCOES);
+    }
+
+    printf("Alunos:\n");
+    for (int i = 0; i < N_ALUNOS; i++) {
+        char *emoji;
+        switch (estado_aluno[i]) {
+            case 0: emoji = "\xF0\x9F\x8D\xBD"; break; 
+            case 1: emoji = "\xF0\x9F\x98\xA4"; break;
+            case -1: emoji = "\xF0\x9F\x98\x8A"; break; 
+            default: emoji = " "; break;
+        }
+        printf("  [A%d] %s refeição %d/%d\n", i, emoji, porcoes_comidas[i], PORCOES_POR_ALUNO);
+    }
+
+    printf("Cozinheiros:\n");
+    for (int i = 0; i < N_COZINHEIROS; i++) {
+        char *emoji_coz = (estado_cozinheiro[i] == 1) ? "\xF0\x9F\x91\xA8\xE2\x80\x8D\xF0\x9F\x8D\xB3" : "\xF0\x9F\x92\xA4";
+        printf("Cozinheiro: %s %s\n", emoji_coz, (estado_cozinheiro[i] == 1) ? "cozinhando" : "dormindo");
+    }
+    printf("------------------------------\n\n");
+    pthread_mutex_unlock(&mutex_print);
+}
 
 void sendMessageToServer(const char* message) {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -47,18 +82,30 @@ void sendMessageToServer(const char* message) {
 }
 
 void putServingsInPot(int id) {
+    estado_cozinheiro[id] = 1;
     char message[128];
+
+    print_estado_global();
+
     snprintf(message, sizeof(message), "putServingsInPot %d %d", id, N_PORCOES);
     sendMessageToServer(message);
+
     sleep(1); 
+
     panelas[id] = N_PORCOES;
-    printf("O cozinheiro %d colocou %d porções na sua panela\n", id, N_PORCOES);
+    estado_cozinheiro[id] = 0;
+
+    print_estado_global();
+
+    panelas[id] = N_PORCOES;
+    
     sem_post(&panela_cheia);
 }
 
 void* f_cozinheiro(void *v) {
     int id = *(int*) v;
     int recarreguei = 0;
+    estado_cozinheiro[id] = 0;
     char message[128];
     while (1) {
         sem_wait(&panela_vazia);
@@ -80,28 +127,31 @@ void* f_cozinheiro(void *v) {
 
 void* f_aluno(void *v) {
     int id = *(int*) v;
-    int porcoes_comidas = 0;
+    porcoes_comidas[id] = 0;
     char message[128];
-    while (porcoes_comidas < PORCOES_POR_ALUNO) {
+
+    print_estado_global();
+
+    while (porcoes_comidas[id] < PORCOES_POR_ALUNO) {
         int conseguiu_comer = 0;
         for (int i = 0; i < N_COZINHEIROS; i++) {
-            sem_wait(&mutex[i]);
+            pthread_mutex_lock(&mutex[i]);
             if (panelas[i] > 0) {
                 snprintf(message, sizeof(message), "getFood %d %d", id, i);
                 sendMessageToServer(message);
                 sleep(6);
                 panelas[i]--;
-                porcoes_comidas++;
-                printf("Aluno %d: pegou da panela %d. (Refeição %d/%d) Porções restantes nessa panela: %d\n",
-                       id, i, porcoes_comidas, PORCOES_POR_ALUNO, panelas[i]);
+                porcoes_comidas[id]++;
+
+                estado_aluno[id] = 1;
                 conseguiu_comer = 1;
-                sem_post(&mutex[i]);
+                pthread_mutex_unlock(&mutex[i]);
                 snprintf(message, sizeof(message), "returnCustomerToRest %d", id);
                 sendMessageToServer(message);
                 sleep(3);
                 break;
             }
-            sem_post(&mutex[i]);
+            pthread_mutex_unlock(&mutex[i]);
         }
 
         if (!conseguiu_comer) {
@@ -113,7 +163,8 @@ void* f_aluno(void *v) {
         }
     }
     
-    printf("Aluno %d: terminei de comer %d vezes.\n", id, PORCOES_POR_ALUNO);
+    estado_aluno[id] = -1;
+    print_estado_global();
     return NULL;
 }
 
@@ -130,8 +181,9 @@ int main() {
 
    
     for (int i = 0; i < N_COZINHEIROS; i++) {
-        sem_init(&mutex[i], 0, 1);
+        pthread_mutex_init(&mutex[i], NULL);
         panelas[i] = 0;
+        estado_cozinheiro[i] = 0;
     }
 
     sem_init(&panela_vazia, 0, 0);
@@ -163,9 +215,10 @@ int main() {
 
     for (int i = 0; i < N_COZINHEIROS; i++) {
         pthread_join(threads_cozinheiros[i], NULL);
-        sem_destroy(&mutex[i]);
+        pthread_mutex_destroy(&mutex[i]);
     }
 
+    pthread_mutex_destroy(&mutex_print);
     sem_destroy(&panela_vazia);
     sem_destroy(&panela_cheia);
 
