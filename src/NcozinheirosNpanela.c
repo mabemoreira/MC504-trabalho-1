@@ -19,6 +19,7 @@ volatile int acabaram = 0;
 int porcoes_comidas[N_ALUNOS];
 int estado_aluno[N_ALUNOS]; // 0 = esperando, 1 = comendo, -1 = finalizado
 int estado_cozinheiro[N_COZINHEIROS]; // 0 = dormindo, 1 = cozinhando
+int panela_comida[N_ALUNOS]; //guarda de qual panela ele comeu por último
 
 pthread_mutex_t mutex[N_COZINHEIROS];  // mutex para cada panela
 sem_t panela_vazia;
@@ -46,6 +47,10 @@ void print_estado_global() {
             default: emoji = " "; break;
         }
         printf("  [A%d] %s refeição %d/%d\n", i, emoji, porcoes_comidas[i], PORCOES_POR_ALUNO);
+        if (estado_aluno[i] == 1) {
+            printf(" comeu da panela %d", panela_comida[i]);
+        }
+        printf("\n");
     }
 
     printf("Cozinheiros:\n");
@@ -146,6 +151,7 @@ void* f_aluno(void *v) {
                 porcoes_comidas[id]++;
                 sleep(3);
                 estado_aluno[id] = 1;
+                panela_comida[id] = i;
                 conseguiu_comer = 1;
                 pthread_mutex_unlock(&mutex[i]);
                 snprintf(message, sizeof(message), "returnCustomerToRest %d", id);
@@ -195,6 +201,10 @@ int main() {
     sendMessageToServer(message);
 
     sleep(8); // Esperando carregar a tela
+
+    for(int i = 0; i < N_ALUNOS; i++){
+        panela_comida[i] = -1;
+    }
 
     for (int i = 0; i < N_COZINHEIROS; i++) {
         ids_cozinheiros[i] = i;
