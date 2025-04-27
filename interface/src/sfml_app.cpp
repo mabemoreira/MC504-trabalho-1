@@ -95,6 +95,7 @@ int main()
             row * 16,
             16,
             16));
+        foodSprites[i].setOrigin(foodSprites[i].getGlobalBounds().width / 2, foodSprites[i].getGlobalBounds().height / 2);
         foodSprites[i].setScale(1.2f, 1.2f);
     }
 

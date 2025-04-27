@@ -58,7 +58,9 @@
     "semaphore": "cpp",
     "stop_token": "cpp",
     "thread": "cpp",
-    "cstring": "cpp"
+    "cstring": "cpp",
+    "condition_variable": "cpp",
+    "mutex": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",
