@@ -192,7 +192,7 @@ int main() {
     snprintf(message, sizeof(message), "init %d %d %d %d", N_PORCOES, N_ALUNOS, N_COZINHEIROS, PORCOES_POR_ALUNO);
     sendMessageToServer(message);
 
-    sleep(3); // Esperando carregar a tela
+    sleep(5); // Esperando carregar a tela
 
     for (int i = 0; i < N_COZINHEIROS; i++) {
         ids_cozinheiros[i] = i;
