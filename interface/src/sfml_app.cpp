@@ -13,6 +13,7 @@
 #include "../include/Customer.hpp"
 #include "../include/Chef.hpp"
 
+
 namespace fs = std::filesystem;
 using namespace std;
 
@@ -67,6 +68,8 @@ int main()
         float x = static_cast<float>(std::rand() % window.getSize().x);
         float y = static_cast<float>(std::rand() % window.getSize().y);
         customers[i].getSprite().setPosition(x, y);
+        customers[i].getLabel().setOrigin(customers[i].getLabel().getGlobalBounds().width / 2, customers[i].getLabel().getGlobalBounds().height / 2);
+        customers[i].getLabel().setPosition(x, y - 50); // Posição acima do sprite
     }
 
 
@@ -129,9 +132,10 @@ int main()
 
         potLabels[i].setFont(font);
         potLabels[i].setString("Panela " + std::to_string(i + 1));
+        potLabels[i].setOrigin(potLabels[i].getGlobalBounds().width / 2, potLabels[i].getGlobalBounds().height / 2);
         potLabels[i].setCharacterSize(20);
         potLabels[i].setFillColor(sf::Color::Black);
-        potLabels[i].setPosition(potX, potY - 30); // Posição acima do sprite
+        potLabels[i].setPosition(potX, potY - 50); // Posição acima do sprite
     }
 
     // Cria signals["n_chefs"] sprites de chefs
@@ -206,7 +210,11 @@ int main()
             case 0:
                 break;
             case 1:
-                moveCostumerToPot(customers[i].getSprite(), customers[i].getLabel(), potSprites[customers[i].getTargetPot()], customerSpeed, deltaTime, i);
+                {sf::Vector2f potPos = potSprites[customers[i].getTargetPot()].getPosition();
+                sf::Vector2f  costumerPos = customers[i].getSprite().getPosition();
+                float distance = std::sqrt(std::pow(potPos.x - costumerPos.x, 2) + std::pow(potPos.y - costumerPos.y, 2));
+                float speed = distance / 2;
+                moveCostumerToPot(customers[i].getSprite(), customers[i].getLabel(), potSprites[customers[i].getTargetPot()], speed, deltaTime, i);}
                 break;
             case 2:
                 break;

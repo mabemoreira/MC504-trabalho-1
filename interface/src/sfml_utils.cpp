@@ -61,7 +61,7 @@ bool moveCostumerToPot(sf::Sprite &costumerSprite, sf::Text &costumerLabel, sf::
 
     bool result = moveTowards(costumerSprite, potPos, costumerVelocity, deltaTime);
 
-    costumerLabel.setPosition(costumerSprite.getPosition().x, costumerSprite.getPosition().y - 30);
+    costumerLabel.setPosition(costumerSprite.getPosition().x, costumerSprite.getPosition().y - 50);
 
     if (!result)
     {
@@ -95,7 +95,7 @@ bool moveCostumerAfterEat(sf::Sprite &costumerSprite, sf::Text &costumerLabel, s
     bool moveCostumer = moveTowards(costumerSprite, targetPos, velocity, deltaTime);
 
     foodSprite.setPosition(costumerSprite.getPosition().x, costumerSprite.getPosition().y);
-    costumerLabel.setPosition(costumerSprite.getPosition().x, costumerSprite.getPosition().y - 30);
+    costumerLabel.setPosition(costumerSprite.getPosition().x, costumerSprite.getPosition().y - 50);
 
     if (moveCostumer)
         costumerLabel.setString("Cliente " + std::to_string(costumerIndex));
