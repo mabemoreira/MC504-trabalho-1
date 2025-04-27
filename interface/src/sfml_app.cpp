@@ -210,11 +210,14 @@ int main()
             case 0:
                 break;
             case 1:
-                {sf::Vector2f potPos = potSprites[customers[i].getTargetPot()].getPosition();
+                {
+                if (customers[i].getSpeed() == 0){
+                sf::Vector2f potPos = potSprites[customers[i].getTargetPot()].getPosition();
                 sf::Vector2f  costumerPos = customers[i].getSprite().getPosition();
                 float distance = std::sqrt(std::pow(potPos.x - costumerPos.x, 2) + std::pow(potPos.y - costumerPos.y, 2));
-                float speed = distance / 2;
-                moveCostumerToPot(customers[i].getSprite(), customers[i].getLabel(), potSprites[customers[i].getTargetPot()], speed, deltaTime, i);}
+                customers[i].setSpeed(distance/2);}
+                moveCostumerToPot(customers[i].getSprite(), customers[i].getLabel(), potSprites[customers[i].getTargetPot()], customers[i].getSpeed(), deltaTime, i);
+                }
                 break;
             case 2:
                 break;
@@ -235,7 +238,13 @@ int main()
             case 0:
                 break;
             case 1:
-                moveChefToPot(chefs[i].getSprite(), chefs[i].getLabel(), activeChefTexture, potSprites[chefs[i].getTargetPot()], chefSpeed, deltaTime, i);
+                {
+                if (chefs[i].getSpeed() == 0){
+                sf::Vector2f potPos = potSprites[chefs[i].getTargetPot()].getPosition();
+                sf::Vector2f  chefPos = chefs[i].getSprite().getPosition();
+                float distance = std::sqrt(std::pow(potPos.x - chefPos.x, 2) + std::pow(potPos.y - chefPos.y, 2));
+                chefs[i].setSpeed(distance/4);}
+                moveChefToPot(chefs[i].getSprite(), chefs[i].getLabel(), activeChefTexture, potSprites[chefs[i].getTargetPot()], chefs[i].getSpeed(), deltaTime, i);}
                 break;
             case 2:
                 break;

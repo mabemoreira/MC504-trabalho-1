@@ -97,7 +97,7 @@ void putServingsInPot(int id) {
     snprintf(message, sizeof(message), "putServingsInPot %d %d", id, N_PORCOES);
     sendMessageToServer(message);
 
-    sleep(1); 
+    sleep(6); 
 
     panelas[id] = N_PORCOES;
     estado_cozinheiro[id] = 0;

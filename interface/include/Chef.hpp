@@ -27,6 +27,7 @@ private:
     int targetPot; // -1 significa sem panela alvo
     float cookingTimer; // Tempo restante cozinhando
     float restTimer; // Tempo restante descansando
+    float speed = 0;
 
 
 public:
@@ -40,6 +41,7 @@ public:
     int getTargetPot() const { return this->targetPot; }
     float getCookingTimer() const { return this->cookingTimer; }
     float getRestTimer() const { return this->restTimer; }
+    float getSpeed() const { return this->speed; };
     
     void setState(int state) { this->state = state; }
     void setLabel(const sf::Text& label) { this->label = label; }
@@ -48,7 +50,7 @@ public:
     void setRestTimer(float restTimer) { this->restTimer = restTimer; }
     void setTargetPot(int targetPot) { this->targetPot = targetPot; }
     void setCookingTimer(float cookingTimer) { this->cookingTimer = cookingTimer; }
-    
+    void setSpeed(float speed) { this->speed = speed; };
 
     void decreaseRestTimer(float deltaTime) { this->restTimer -= deltaTime; }
     void decreaseCookingTimer(float deltaTime) { this->cookingTimer -= deltaTime; }
