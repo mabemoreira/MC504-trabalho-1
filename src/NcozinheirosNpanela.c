@@ -24,9 +24,11 @@ pthread_mutex_t mutex[N_COZINHEIROS];  // mutex para cada panela
 sem_t panela_vazia;
 sem_t panela_cheia;
 pthread_mutex_t mutex_print;  
+int contador = 0;
 
 void print_estado_global() {
     pthread_mutex_lock(&mutex_print);
+    printf("%d", contador++);
     printf("\n------------------------------\n");
     for (int i = 0; i < N_COZINHEIROS; i++) {
         printf("Panela %d: [", i);
@@ -135,14 +137,14 @@ void* f_aluno(void *v) {
     while (porcoes_comidas[id] < PORCOES_POR_ALUNO) {
         int conseguiu_comer = 0;
         for (int i = 0; i < N_COZINHEIROS; i++) {
-            pthread_mutex_lock(&mutex[i]);
+            pthread_mutex_trylock(&mutex[i]);
+            
             if (panelas[i] > 0) {
                 snprintf(message, sizeof(message), "getFood %d %d", id, i);
                 sendMessageToServer(message);
-                sleep(6);
                 panelas[i]--;
                 porcoes_comidas[id]++;
-
+                sleep(3);
                 estado_aluno[id] = 1;
                 conseguiu_comer = 1;
                 pthread_mutex_unlock(&mutex[i]);
@@ -192,7 +194,7 @@ int main() {
     snprintf(message, sizeof(message), "init %d %d %d %d", N_PORCOES, N_ALUNOS, N_COZINHEIROS, PORCOES_POR_ALUNO);
     sendMessageToServer(message);
 
-    sleep(5); // Esperando carregar a tela
+    sleep(8); // Esperando carregar a tela
 
     for (int i = 0; i < N_COZINHEIROS; i++) {
         ids_cozinheiros[i] = i;
