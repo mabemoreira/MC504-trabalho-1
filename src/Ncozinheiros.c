@@ -32,8 +32,8 @@ void print_estado_global() {
     for (int i = 0; i < N_ALUNOS; i++) {
         char *emoji;
         switch (estado_aluno[i]) {
-            case 0: emoji = "\xF0\x9F\x8D\xBD"; break; 
-            case 1: emoji = "\xF0\x9F\x98\xA4"; break;
+            case 0: emoji = "\xF0\x9F\x98\xA4"; break; 
+            case 1: emoji = "\xF0\x9F\x8D\xBD"; break;
             case -1: emoji = "\xF0\x9F\x98\x8A"; break; 
             default: emoji = " "; break;
         }
