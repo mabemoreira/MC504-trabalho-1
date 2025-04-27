@@ -222,15 +222,22 @@ int main()
         // Atualização da lógica dos chefs
         for (int i = 0; i < signals["n_chefs"]; ++i)
         {
-        //    switch (chefs[i].getState())
-        //    {
-        //    case 1:
-        //     /* code */
-        //     break;
-           
-        //    default:
-        //     break;
-        //    }
+            switch (chefs[i].getState())
+            {
+            case 0:
+                break;
+            case 1:
+                moveChefToPot(chefs[i].getSprite(), chefs[i].getLabel(), activeChefTexture, potSprites[chefs[i].getTargetPot()], chefSpeed, deltaTime, i);
+                break;
+            case 2:
+                break;
+            case 3:
+                returnChefToRest(chefs[i].getSprite(), chefs[i].getLabel(), returningChefTexture, chefTexture, chefSpeed, deltaTime, i, chefs[i].getRestPosition());
+                break;
+        
+            default:
+                break;
+            }
 
         }
         window.clear(sf::Color(246, 241, 230)); // Fundo bege

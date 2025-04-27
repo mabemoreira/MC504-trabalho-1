@@ -66,13 +66,14 @@ void* f_cozinheiro(void *v) {
         sendMessageToServer(message);
 
         if (acabaram) {
-            snprintf(message, sizeof(message), "returnChefToRest %d", id);
-            sendMessageToServer(message);
             printf("O cozinheiro %d está indo embora, ele recarregou sua panela %d vezes.\n", id, recarreguei);
             break;
         }
         putServingsInPot(id);
         recarreguei++;
+        snprintf(message, sizeof(message), "returnChefToRest %d", id);
+        sendMessageToServer(message);
+        sleep(15); 
     }
     return NULL;
 }
