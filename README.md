@@ -103,6 +103,20 @@ cmake ..
 make
 ```
 
+### Executando os códigos mais simples
+Para os códigos com 1 cozinheiros e N cozinheiros e 1 panela, fizemos a visão global apenas no terminal 
+
+Para rodar o de 1 cozinheiro, direto da pasta build digite no terminal: 
+
+```bash
+./exec/1cozinheiro
+```
+De maneira análoga, para rodar o de N cozinheiros e 1 panela, digite 
+
+```bash
+./exec/Ncozinheiros
+```
+
 ### Executando a interface como Servidor
 ```bash
 ./exec/sfml_app
@@ -114,11 +128,13 @@ O sevidor é iniciado e fica aguardando o código em C ser execultado para inici
 sudo fuser -k 53002/tcp
 ```
 
-Agora você deve ser capaz de executar o servidor.
+Agora você deve ser capaz de executar o servidor. 
 
 ### Executando o código 
+Com o servidor rodando, abra um novo terminal e rode 
+
 ```bash
-./exec/NcozinheirosNpanelas
+./exec/NcozinheirosNpanela > out.txt
 ```
 
-A saída do programa aparecerá no terminal, enquanto uma janela do SFML é aberta para exibição da interface.
+A saída do programa aparecerá no arquivo out.txt, enquanto uma janela do SFML é aberta para exibição da interface.
