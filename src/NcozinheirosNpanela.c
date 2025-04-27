@@ -88,13 +88,16 @@ void* f_aluno(void *v) {
             if (panelas[i] > 0) {
                 snprintf(message, sizeof(message), "getFood %d %d", id, i);
                 sendMessageToServer(message);
+                sleep(6);
                 panelas[i]--;
                 porcoes_comidas++;
                 printf("Aluno %d: pegou da panela %d. (Refeição %d/%d) Porções restantes nessa panela: %d\n",
                        id, i, porcoes_comidas, PORCOES_POR_ALUNO, panelas[i]);
                 conseguiu_comer = 1;
                 sem_post(&mutex[i]);
-                snprintf(message, sizeof(message), "returnCostumerToRest %d", id);
+                snprintf(message, sizeof(message), "returnCustomerToRest %d", id);
+                sendMessageToServer(message);
+                sleep(3);
                 break;
             }
             sem_post(&mutex[i]);
@@ -135,6 +138,8 @@ int main() {
 
     snprintf(message, sizeof(message), "init %d %d %d %d", N_PORCOES, N_ALUNOS, N_COZINHEIROS, PORCOES_POR_ALUNO);
     sendMessageToServer(message);
+
+    sleep(3); // Esperando carregar a tela
 
     for (int i = 0; i < N_COZINHEIROS; i++) {
         ids_cozinheiros[i] = i;

@@ -16,142 +16,6 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-bool moveTowards(sf::Sprite &sprite, sf::Vector2f targetPos, float speed, float deltaTime)
-{
-    sf::Vector2f currentPos = sprite.getPosition();
-    sf::Vector2f direction = targetPos - currentPos;
-
-    // Calcula a distância até o alvo
-    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-    // Verifica se já está no alvo ou muito perto
-    // Se a distância restante for menor que a distância que moveria neste frame,
-    // apenas coloque o sprite no alvo para evitar ultrapassar.
-    if (distance <= speed * deltaTime || distance == 0.f)
-    {
-        sprite.setPosition(targetPos);
-        return true; // Alvo alcançado
-    }
-    else
-    {
-        // Normaliza o vetor de direção (torna o comprimento 1)
-        sf::Vector2f normalizedDirection = direction / distance;
-        // Calcula o vetor de movimento para este frame
-        sf::Vector2f movement = normalizedDirection * speed * deltaTime;
-        // Move o sprite
-        sprite.move(movement);
-        return false; // Alvo ainda não alcançado
-    }
-}
-
-bool moveCostumerToPot(sf::Sprite &costumerSprite, sf::Text &costumerLabel, sf::Sprite &potSprite, float costumerVelocity, float deltaTime, int costumerIndex)
-{
-    sf::Vector2f potPos = potSprite.getPosition();
-    sf::FloatRect potBounds = potSprite.getGlobalBounds();
-    sf::FloatRect customerBounds = costumerSprite.getGlobalBounds();
-
-    // Escolhendo se o boneco para mais a esquerda ou direita da panela
-    potPos.x += (std::rand() % 2 == 0) ? (customerBounds.width + 20) : (-customerBounds.width - 20);
-    // Escolhendo se a pessoa come pela parte de cima ou de baixo da panela
-    if (customerBounds.top <= potPos.y)
-        potPos.y -= potBounds.height / 2 + customerBounds.height / 2;
-    else
-        potPos.y += potBounds.height / 2 + customerBounds.height / 2;
-
-    bool result = moveTowards(costumerSprite, potPos, costumerVelocity, deltaTime);
-
-    costumerLabel.setPosition(costumerSprite.getPosition().x, costumerSprite.getPosition().y - 30);
-
-    if (!result)
-    {
-        // Se o cliente chegou à panela, atualiza a posição do label
-        costumerLabel.setString("Cliente " + std::to_string(costumerIndex + 1) + " (Indo a panela)");
-    }
-    else
-    {
-        // Se o cliente chegou à panela, atualiza a posição do label
-        std::string currentLabelText = costumerLabel.getString();
-        costumerLabel.setString("Cliente " + std::to_string(costumerIndex + 1) + " (Enchendo a bandeja)");
-    }
-    return result;
-}
-
-bool watingToEat(sf::Sprite &costumerSprite, sf::Sprite &potSprite, float costumerVelocity, float deltaTime)
-{
-    // Se a panela está vazia, espera encher
-    // Se a panela está cheia, ficar enchendo a bandeja
-    // Se já passou o tempo de espera, vai embora
-    return false;
-}
-
-bool moveCostumerAfterEat(sf::Sprite &costumerSprite, sf::Text &costumerLabel, sf::Sprite &foodSprite, float velocity, float deltaTime, int costumerIndex)
-{
-    costumerLabel.setString("Cliente " + std::to_string(costumerIndex) + " (indo a mesa)");
-    sf::Vector2f targetPos;
-    targetPos.x = -costumerSprite.getGlobalBounds().width - 60;
-    targetPos.y = costumerSprite.getPosition().y;
-
-    bool moveCostumer = moveTowards(costumerSprite, targetPos, velocity, deltaTime);
-
-    foodSprite.setPosition(costumerSprite.getPosition().x, costumerSprite.getPosition().y);
-    costumerLabel.setPosition(costumerSprite.getPosition().x, costumerSprite.getPosition().y - 30);
-
-    return moveCostumer;
-}
-
-bool moveChefToPot(sf::Sprite &chefSprite, sf::Text &chefLabel, sf::Texture &activeChefTexture, sf::Sprite &potSprite, float chefVelocity, float deltaTime, int chefIndex)
-{
-    chefSprite.setTexture(activeChefTexture);
-    chefSprite.setScale(1.5f, 1.5f);
-
-    sf::Vector2f potPos = potSprite.getPosition();
-    sf::FloatRect potBounds = potSprite.getGlobalBounds();
-    sf::FloatRect chefBounds = chefSprite.getGlobalBounds();
-
-    // Escolhendo se a pessoa come pela parte de cima ou de baixo da panela
-    if (chefBounds.top <= potPos.y)
-        potPos.y -= potBounds.height / 2 + chefBounds.height / 2 + 10;
-
-    bool result = moveTowards(chefSprite, potPos, chefVelocity, deltaTime);
-
-    chefLabel.setPosition(chefSprite.getPosition().x, chefSprite.getPosition().y - 30);
-
-    if (!result)
-    {
-        // Se o cliente chegou à panela, atualiza a posição do label
-        std::string currentLabelText = chefLabel.getString();
-        chefLabel.setString("Chef " + std::to_string(chefIndex + 1) + " (Indo a panela)");
-    }
-    else
-    {
-        // Se o cliente chegou à panela, atualiza a posição do label
-        std::string currentLabelText = chefLabel.getString();
-        chefLabel.setString("Chef " + std::to_string(chefIndex + 1) + " (Enchendo a bandeja)");
-    }
-    return result;
-}
-
-bool returnChefToRest(sf::Sprite &chefSprite, sf::Text &chefLabel, sf::Texture &returningChef, sf::Texture &sleepingChef, float chefVelocity, float deltaTime, int chefIndex, sf::Vector2f inicialPos)
-{
-    chefSprite.setTexture(returningChef);
-    chefSprite.setScale(1.5f, 1.5f);
-
-    bool result = moveTowards(chefSprite, inicialPos, chefVelocity, deltaTime);
-
-    if (result)
-    {
-        chefSprite.setTexture(sleepingChef);
-        chefSprite.setScale(1.5f, 1.5f);
-        chefLabel.setString("Chef " + std::to_string(chefIndex + 1));
-    }
-    else
-    {
-        // Se o cliente chegou à panela, atualiza a posição do label
-        chefLabel.setString("Chef " + std::to_string(chefIndex + 1) + " (Indo descansar)");
-    }
-    return result;
-}
-
 int main()
 {
     std::map<std::string, int> signals;
@@ -165,8 +29,9 @@ int main()
 
     std::vector<Customer> customers;
     std::vector<Chef> chefs;
+    sf::Clock clock;
 
-    std::thread signalThread(receiveSignals, std::ref(signals), std::ref(customers), std::ref(chefs));
+    std::thread signalThread(receiveSignals, std::ref(signals), std::ref(customers), std::ref(chefs), std::ref(clock));
     signalThread.detach();
 
     while (!signals["init"])
@@ -208,7 +73,6 @@ int main()
     // Velocidade dos chefs
     float chefSpeed = 120.0f;
 
-    sf::Clock clock;
 
     sf::Texture foodTexture;
     if (!foodTexture.loadFromFile("../assets/PixelFood.png"))
@@ -332,158 +196,42 @@ int main()
             }
         }
         float deltaTime = clock.restart().asSeconds(); // Tempo desde o último frame
-        float customerSpeed = 100.0f;                  // Velocidade dos clientes
+        float customerSpeed = 200.0f;                  // Velocidade dos clientes
         // Atualização da lógica dos clientes
         for (int i = 0; i < signals["n_alunos"]; ++i)
         {
-            // Se o cliente está comendo
-            if (customers[i].isEating())
+           
+            switch (customers[i].getState())
             {
-                customers[i].decreaseEatingTimer(deltaTime);
-                // Se terminou de comer
-                if (customers[i].getEatingTimer() <= 0.0f)
-                {
-                    // Mudança de estado: comendo → saindo
-                    customers[i].setEating(false);
-                    customers[i].setLeaving(true);
-                    std::cout << "Cliente " << (i + 1) << " terminou de comer e está saindo" << std::endl;
-                    customers[i].getLabel().setString("Cliente " + std::to_string(i + 1) + " (saindo)");
-                }
-                continue; // Vai para o próximo cliente
-            }
+            case 0:
+                break;
+            case 1:
+                moveCostumerToPot(customers[i].getSprite(), customers[i].getLabel(), potSprites[customers[i].getTargetPot()], customerSpeed, deltaTime, i);
+                break;
+            case 2:
+                break;
+            case 3:
+                moveCostumerAfterEat(customers[i].getSprite(), customers[i].getLabel(), foodSprites[i], customerSpeed, deltaTime, i);
+                break;
+            default:
+                break;
+            }            
 
-            // Se o cliente está saindo
-            if (customers[i].isLeaving())
-            {
-                // Usa a função moveCostumerAfterEat para mover o cliente para fora da tela
-                bool leftScreen = moveCostumerAfterEat(customers[i].getSprite(), customers[i].getLabel(), foodSprites[i], customerSpeed, deltaTime, i);
-
-                // Se o cliente saiu da tela
-                if (leftScreen)
-                {
-                    // Não reposiciona o cliente - deixa ele fora da tela
-                    // Apenas reseta o estado para não estar mais "saindo"
-                    customers[i].setLeaving(false);
-                    customers[i].getLabel().setString("Cliente " + std::to_string(i + 1));
-
-                    // Não precisa atribuir nova velocidade aqui, já que o cliente está fora da tela
-                    continue;                                           // Vai para o próximo cliente @debug_henrique
-                }
-                if (!customers[i].isMoving() && (std::rand() % 100 < 2)) // 2% de chance a cada frame
-                {
-                    // Verifica se o cliente está fora da tela (posição x negativa)
-                    if (customers[i].getSprite().getPosition().x < 0)
-                    {
-                        // Reposiciona o cliente no lado direito da tela
-                        float newX = window.getSize().x + 10;
-                        float newY = static_cast<float>(std::rand() % (int)(window.getSize().y - 100)) + 50;
-                        customers[i].getSprite().setPosition(newX, newY);
-
-                        // Atualiza o label para a nova posição
-                        customers[i].getLabel().setPosition(newX, newY - 30);
-                    }
-
-                    // Escolhe uma panela aleatória
-                    customers[i].setTargetPot(std::rand() % signals["n_chefs"]);
-                    customers[i].setMoving(true);
-                    std::cout << "Cliente " << (i + 1) << " decidiu ir para a panela " << (customers[i].getTargetPot() + 1) << std::endl;
-                }
-            }
-
-            // Se o cliente não está se movendo para uma panela nem comendo nem saindo
-            if (!customers[i].isMoving() && (std::rand() % 100 < 2)) // 2% de chance a cada frame
-            {
-                // Escolhe uma panela aleatória
-                customers[i].setTargetPot(std::rand() % signals["n_chefs"]);
-                customers[i].setMoving(true);
-                std::cout << "Cliente " << (i + 1) << " decidiu ir para a panela " << (customers[i].getTargetPot() + 1) << std::endl;
-            }
-
-            // Se o cliente está se movendo para uma panela
-            if (customers[i].isMoving())
-            {
-                // Usando sua função moveCostumerToPot
-                bool reached = moveCostumerToPot(customers[i].getSprite(), customers[i].getLabel(), potSprites[customers[i].getTargetPot()],
-                                                    customerSpeed, deltaTime, i);
-
-                // Se o cliente chegou à panela
-                if (reached)
-                {
-                    std::cout << "Cliente " << (i + 1) << " chegou à panela " << (customers[i].getTargetPot() + 1) << std::endl;
-
-                    // Muda para o estado "comendo"
-                    customers[i].setMoving(false);
-                    customers[i].setEating(true);
-                    customers[i].setEatingTimer(2.0f); // 2 segundos comendo
-
-                    // Atualiza o label
-                    customers[i].getLabel().setString("Cliente " + std::to_string(i + 1) + " (comendo)");
-                }
-            }
         }
 
         // Atualização da lógica dos chefs
         for (int i = 0; i < signals["n_chefs"]; ++i)
         {
-            // Estado 0: Chef está descansando
-            if (chefs[i].getState() == 0)
-            {
-                chefs[i].decreaseRestTimer(deltaTime);
+        //    switch (chefs[i].getState())
+        //    {
+        //    case 1:
+        //     /* code */
+        //     break;
+           
+        //    default:
+        //     break;
+        //    }
 
-                // Se terminou o descanso
-                if (chefs[i].getRestTimer() <= 0.0f)
-                {
-                    // Escolhe uma panela aleatória (ou pode ser a própria panela do chef)
-                    chefs[i].setTargetPot(i); // Cada chef cuida de sua própria panela
-                    chefs[i].setState(1);     // Muda para estado "indo para panela"
-                    std::cout << "Chef " << (i + 1) << " está indo para a panela " << (chefs[i].getTargetPot() + 1) << std::endl;
-                }
-            }
-
-            // Estado 1: Chef está indo para a panela
-            else if (chefs[i].getState() == 1)
-            {
-                bool reached = moveChefToPot(chefs[i].getSprite(), chefs[i].getLabel(), activeChefTexture, potSprites[chefs[i].getTargetPot()],
-                                                chefSpeed, deltaTime, i);
-
-                // Se chegou à panela
-                if (reached)
-                {
-                    chefs[i].setState(2);                                                 // Muda para estado "cozinhando"
-                    chefs[i].setCookingTimer(3.0f + static_cast<float>(std::rand() % 2)); // 3-5 segundos cozinhando
-                    std::cout << "Chef " << (i + 1) << " está cozinhando na panela " << (chefs[i].getTargetPot() + 1) << std::endl;
-                }
-            }
-
-            // Estado 2: Chef está cozinhando
-            else if (chefs[i].getState() == 2)
-            {
-                chefs[i].decreaseCookingTimer(deltaTime);
-
-                // Se terminou de cozinhar
-                if (chefs[i].getCookingTimer() <= 0.0f)
-                {
-                    chefs[i].setState(3); // Muda para estado "retornando"
-                    std::cout << "Chef " << (i + 1) << " está retornando ao descanso" << std::endl;
-                }
-            }
-
-            // Estado 3: Chef está retornando ao descanso
-            else if (chefs[i].getState() == 3)
-            {
-                bool returned = returnChefToRest(chefs[i].getSprite(), chefs[i].getLabel(), returningChefTexture, chefTexture, chefSpeed, deltaTime, i, chefs[i].getRestPosition());
-
-                // Se chegou ao local de descanso
-                if (returned)
-                {
-                    chefs[i].setState(0);                                              // Muda para estado "descansando"
-                    chefs[i].setRestTimer(5.0f + static_cast<float>(std::rand() % 5)); // 5-10 segundos descansando
-                    std::cout << "Chef " << (i + 1) << " está descansando" << std::endl;
-                }
-            }
-
-            // Atualiza a posição do label do chef
-            chefs[i].getLabel().setPosition(chefs[i].getSprite().getPosition().x, chefs[i].getSprite().getPosition().y - 30);
         }
         window.clear(sf::Color(246, 241, 230)); // Fundo bege
 
@@ -497,7 +245,7 @@ int main()
         // Desenha os sprites e labels dos alimentos
         for (int i = 0; i < signals["n_alunos"]; ++i)
         {
-            if (customers[i].isLeaving())
+            if (customers[i].getState() == 3) // Saindo 
             {
                 window.draw(foodSprites[i]);
             }

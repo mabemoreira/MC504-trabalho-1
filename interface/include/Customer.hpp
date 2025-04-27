@@ -25,12 +25,9 @@ private:
     sf::Text label; // Label contendo nome do cliente
     sf::Vector2f velocity;
     
-    bool moving;
-    bool eating;
-    bool leaving;
     int id;
+    int state; // 0: descansando, 1: indo para panela, 2: comendo, 3: retornando
     int targetPot; // -1 significa sem panela alvo
-    float eatingTimer; // Tempo restante comendo
 
 public:
 
@@ -40,23 +37,15 @@ public:
     sf::Text& getLabel() { return this->label; }
     sf::Vector2f& getVelocity() { return this->velocity; }
     sf::Texture& getTexture() { return this->texture; }
-    bool isMoving() const { return moving; }
-    bool isEating() const { return eating; }
-    bool isLeaving() const { return leaving; }
+    int getState() const { return this->state; }
     int getTargetPot() const { return this->targetPot; }
-    float getEatingTimer() const { return this->eatingTimer; }
     int getId() const { return this->id; }
 
     void setSprite(const sf::Sprite& sprite) { this->sprite = sprite; }
     void setLabel(const sf::Text& label) { this->label = label; }
     void setVelocity(const sf::Vector2f& velocity) { this->velocity = velocity; }
-    void setMoving(bool moving) { this->moving = moving; }
-    void setEating(bool eating) { this->eating = eating; }
-    void setLeaving(bool leaving) { this->leaving = leaving; }
+    void setState(int state) { this->state = state; }
     void setTargetPot(int targetPot) { this->targetPot = targetPot; }
-    void setEatingTimer(float eatingTimer) { this->eatingTimer = eatingTimer; }
-
-    void decreaseEatingTimer(float deltaTime) { this->eatingTimer -= deltaTime; }
 
     void printAttributes() const;
 

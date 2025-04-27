@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 using namespace std;
 
 Customer::Customer(int index_customer, std::vector<std::string> customerFiles, const sf::Font& font, sf::RenderWindow& window)
-    : moving(false), eating(false), leaving(false), targetPot(-1), eatingTimer(0.0f), id(index_customer)
+    : state(0), targetPot(-1), id(index_customer)
 {
     std::srand(std::time(nullptr)); // Inicializa o gerador de números aleatórios
 
@@ -44,20 +44,5 @@ Customer::Customer(int index_customer, std::vector<std::string> customerFiles, c
     this->label.setPosition(x, y - 30);
 
 }
-
-void Customer::printAttributes() const {
-    std::cout << "Customer Attributes:" << std::endl;
-    std::cout << "  Sprite File: " << spriteFile << std::endl;
-    std::cout << "  Position: (" << sprite.getPosition().x << ", " << sprite.getPosition().y << ")" << std::endl;
-    std::cout << "  Scale: (" << sprite.getScale().x << ", " << sprite.getScale().y << ")" << std::endl;
-    std::cout << "  Moving: " << (moving ? "true" : "false") << std::endl;
-    std::cout << "  Eating: " << (eating ? "true" : "false") << std::endl;
-    std::cout << "  Leaving: " << (leaving ? "true" : "false") << std::endl;
-    std::cout << "  Target Pot: " << targetPot << std::endl;
-    std::cout << "  Eating Timer: " << eatingTimer << std::endl;
-    std::cout << "  Label Text: " << label.getString().toAnsiString() << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-}
-
 
 Customer::~Customer() {}
