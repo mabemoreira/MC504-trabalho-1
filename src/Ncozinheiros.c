@@ -22,6 +22,8 @@ sem_t panela_cheia;     // avisa se a panela ta cheia
 pthread_mutex_t mutex_print; 
 
 void print_estado_global() {
+    // imprime o estado global da aplicação. Apesar do mutex de impressão só ser chamado nessa função, ela é chamada
+    // por múltiplas threads, então ele se faz necessário
     pthread_mutex_lock(&mutex_print);
     printf("\n------------------------------\n");
     printf("Panela: [");
@@ -48,6 +50,8 @@ void print_estado_global() {
 }
 
 void putServingsInPot(int n) {
+    // cozinheiro é colocado como trabalhando, e imprime o estado global. 
+    //depois de repor a panela, imprime novamente e avisa aos alunos que está cheia
     estado_cozinheiro[n] = 1;
     print_estado_global();
     sleep(1);
@@ -58,6 +62,7 @@ void putServingsInPot(int n) {
 }
 
 void* f_cozinheiro(void *v) {
+    // espera até receber sinal que a panela está vazia e chama putServingsinPot para recarregá-la
     int id = *(int*) v;
     int recarreguei = 0;
     estado_cozinheiro[id] = 0;
@@ -78,7 +83,8 @@ void* f_aluno(void *v) {
     porcoes_comidas[id] = 0;
     estado_aluno[id] = 0;
     print_estado_global();
-
+// enquanto não comer a quantidade estipulada, tenta pegar o lock da panela
+// quando consegue, checa se ela está vazia. Se sim, espera o cozinheiro encher 
     while (porcoes_comidas[id] < PORCOES_POR_ALUNO) {
         estado_aluno[id] = 0;
         print_estado_global();

@@ -21,6 +21,8 @@ sem_t panela_cheia;     // avisa se a panela ta cheia
 pthread_mutex_t mutex_print; 
 
 void print_estado_global() {
+    // imprime o estado global da aplicação. Apesar do mutex de impressão só ser chamado nessa função, ela é chamada
+    // por múltiplas threads, então ele se faz necessário
     pthread_mutex_lock(&mutex_print);
     printf("\n------------------------------\n");
     printf("Panela: [");
@@ -38,7 +40,8 @@ void print_estado_global() {
         }
         printf("  [A%d] %s refeição %d/%d\n", i, emoji, porcoes_comidas[i], PORCOES_POR_ALUNO);
     }
-    char *emoji_coz = (estado_cozinheiro == 1) ? "\xF0\x9F\x91\xA8\xE2\x80\x8D\xF0\x9F\x8D\xB3" : "\xF0\x9F\x92\xA4"; // 👨‍🍳 ou 😴
+    
+    char *emoji_coz = (estado_cozinheiro == 1) ? "\xF0\x9F\x91\xA8\xE2\x80\x8D\xF0\x9F\x8D\xB3" : "\xF0\x9F\x92\xA4"; 
     printf("Cozinheiro: %s %s\n", emoji_coz, (estado_cozinheiro == 1) ? "cozinhando" : "dormindo");
     printf("------------------------------\n\n");
     pthread_mutex_unlock(&mutex_print);

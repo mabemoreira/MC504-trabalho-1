@@ -28,6 +28,8 @@ pthread_mutex_t mutex_print;
 int contador = 0;
 
 void print_estado_global() {
+    // imprime o estado global da aplicação. Apesar do mutex de impressão só ser chamado nessa função, ela é chamada
+    // por múltiplas threads, então ele se faz necessário
     pthread_mutex_lock(&mutex_print);
     printf("%d", contador++);
     printf("\n------------------------------\n");

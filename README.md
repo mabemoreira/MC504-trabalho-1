@@ -18,6 +18,8 @@ Como no livro, precisamos de 3 semáforos, 2 tradicionais e um mutex.
 
 Os semáforos tradicionais avisam se a panela está cheia ou vazia e o mutex é o que garante que um aluno pode pegar uma porção da panela, isto é, acessar a região crítica.
 
+Também há um mutex extra para impressão, mas isso será visto posteriormente 
+
 A região crítica é defininda pela variável porções, que indica quantas porções existem __atualmente__ na panela.
 
 Também temos a variável volátil acabaram, simplesmente para avisar a thread cozinheiro quando ela deve parar 
@@ -65,11 +67,19 @@ Para comer, os alunos checam se podem comer em qualquer uma das panelas. Se o mu
 
 A variável volátil porções foi substituída pelo vetor panelas, no qual o cozinheiro i repõe apenas as porções da panela i.
 
+### Representação gráfica 🖥️ 
 
+No geral, optamos por representar globalmente no terminal o estado da aplicação. Para isso, precisamos criar mais uma função e impressão e um mutex para ela, uma vez que, apesar dela não ser sua própria thread, ela era chamada por várias.
+
+Essa função primeiramente imprime todas as panelas, depois imprime o estado dos alunos. Para fazer isso, criamos um vetor auxiliar estado_aluno que guarda 0 quando o aluno i está esperando, 1 quando está comendo e -1 quando acabou de comer. O mesmo foi feito para os cozinheiros no vetor estado_cozinheiro, no qual a posição i guarda 0 se ele está dormindo e 1 se está cozinhando. Os cozinheiros são os últimos a serem impressos.
+
+Optamos por chamar essa função toda vez que algum estado mudava no código, isto é, quando um aluno comia ou acabava de comer, quando o cozinheiro acordava ou dormia.
+
+Contudo, para a versão mais complexa, foi feita uma interface gráfica com SFML. Ela não age exatamente como o código original (por exemplo, não cria mais de 5 cozinheiros por conta do tamanho da tela), mas já é uma versão melhor do que o terminal.
 
 ## Interface gráfica 🖥️
 
-A interface gráfica foi desenvolvida utilizando a biblioteca SFML e permite visualizar a execução do problema de sincronização em tempo real. Ela exibe os seguintes elementos:
+A interface gráfica do último problema foi desenvolvida utilizando a biblioteca SFML e permite visualizar a execução do problema de sincronização em tempo real. Ela exibe os seguintes elementos:
 
 - Alunos: Representados por sprites, com estados como "esperando", "comendo" ou "finalizado".
 - Cozinheiros: Mostrados enquanto estão "cozinhando" ou "descansando".
@@ -116,8 +126,8 @@ De maneira análoga, para rodar o de N cozinheiros e 1 panela, digite
 ```bash
 ./exec/Ncozinheiros
 ```
-
-### Executando a interface como Servidor
+### Executando o código de N cozinheiros e N panelas 
+#### Executando a interface como Servidor
 ```bash
 ./exec/sfml_app
 ```
@@ -130,7 +140,7 @@ sudo fuser -k 53002/tcp
 
 Agora você deve ser capaz de executar o servidor. 
 
-### Executando o código 
+#### Executando o código 
 Com o servidor rodando, abra um novo terminal e rode 
 
 ```bash
