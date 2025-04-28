@@ -1,5 +1,5 @@
 > **Nota Explicativa:**  
-> Este arquivo contém uma conversa sobre o funcionamento da passagem de sprits e a inicialização dela dentro de funções. A LLM me explicou que quando uma sprit é innicializada dentro de uma função, o carregamento é encerrado depois da finzalização dela.
+> Este arquivo contém uma conversa sobre o funcionamento da passagem de sprits e a inicialização dela dentro de funções. A LLM me explicou que quando uma sprit é innicializada dentro de uma função, o carregamento é encerrado depois da finzalização dela. Com isso, eu consegui fazer os ajustes necessários no controle que eu fiz para debug.
 
 viniguedes29: Gostaria que essa lógica ficasse dentro da função.
 Coloquei as sprits dentro do vetor foodSprites.
